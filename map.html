@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <!-- <link rel="stylesheet" href="css/style.css"> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <title>Foretias Map</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: rgba(0, 0, 0, 0.6);
+
+        }
+
+        #map {
+            position: absolute;
+            height: 100vh;
+            width: 100vw;
+            top: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+
+
+        @keyframes fade {
+            from {
+                opacity: 0.5;
+            }
+        }
+
+        .blinking {
+            animation: fade 1s infinite alternate;
+        }
+
+        .leaflet-bottom.leaflet-right .leaflet-control-attribution {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <script>
+        var sPageURL = decodeURIComponent(window.location.search.substring(1));
+        var sURLVariables = sPageURL.split('&');
+        // console.log(sURLVariables)
+        var param = ''
+        for (var i = 0; i < sURLVariables.length; i++) {
+            var sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] == 'image') {
+                var url_image = sParameterName[1]
+            }
+            else if (sParameterName[0] == 'data') { param += sParameterName[1] }
+            else param = param + '&' + sParameterName[0] + '=' + sParameterName[1]
+
+        }
+
+        // Initialize the map
+        // var map = L.map('map').setView([13.65380, 100.66408], 17);
+        var map = L.map('map', {
+            crs: L.CRS.Simple,
+            minZoom: -2
+        });
+        // var bounds = [[0, 0], [1000, 1000]];
+        var bounds = [[0, 0], [1080, 1920]];
+        // var image = L.imageOverlay('images/Forest-2.png', bounds).addTo(map);
+        var image = L.imageOverlay(url_image, bounds).addTo(map);
+        map.fitBounds(bounds);
+
+        map.setView([540, 960], -1);
+
+        const obj = JSON.parse(param);
+        console.log(obj);
+
+        for (let i in obj) {
+            obj[i].polygon = JSON.parse(obj[i].polygon)
+            // console.log(obj[i].name);
+            // console.log(obj[i].polygon);
+            var color = 'rgba(76, 169, 94, 1)'
+            if (obj[i].status == 'firing') {
+                color = 'rgba(236, 99, 64, 1)'
+            }
+            else if (obj[i].status == 'acknowledged') {
+                color = 'rgba(243, 175, 61, 1)'
+            }
+            // console.log(obj[i].name + color)
+            if (obj[i].polygon.length > 2) {
+                var polygonCoordinates = obj[i].polygon;
+                var polygon = L.polygon(polygonCoordinates, {
+                    color: 'black', // 'rgba(236, 99, 64, 1)',    // Border color of the polygon
+                    fillColor: color, //'rgba(236, 99, 64, 1)', // Fill color of the polygon
+                    fillOpacity: 0.3  // Opacity of the fill color (0 is fully transparent, 1 is fully opaque)
+                }).addTo(map);
+
+                // Add a tooltip to the polygon with closeOnClick set to false
+                polygon.bindTooltip(obj[i].name, { closeOnClick: false });
+
+                // // Add an onClick event to forward to obj[i].link
+                polygon.on('click', function () {
+                    window.open(obj[i].link, "_top");
+                });
+            } else {
+                var LeafIcon = L.Icon.extend({
+                    options: {
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 40],
+                        color: color,
+                        // className: 'blinking',
+                        iconUrl: obj[i].icon // Specify the path to your custom icon
+                    }
+                });
+
+                var customIcon = new LeafIcon();
+
+                var marker = L.marker(obj[i].polygon, { icon: customIcon }).addTo(map);
+
+                marker.bindTooltip(obj[i].name, {
+                    offset: [0, -45],
+                    direction: 'top'
+                });
+            }
+
+
+        }
+    </script>
+</body>
+
+</html>
