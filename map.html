@@ -81,6 +81,7 @@
 
         for (let i in obj) {
             obj[i].polygon = JSON.parse(obj[i].polygon)
+            
             // console.log(obj[i].name);
             // console.log(obj[i].polygon);
             // var color = 'rgba(76, 169, 94, 1)'
@@ -107,7 +108,7 @@
                 polygon.on('click', function () {
                     window.open(obj[i].link, "_top");
                 });
-            } else {
+            } else if(obj[i].polygon.length != 0) {
                 var LeafIcon = L.Icon.extend({
                     options: {
                         iconSize: [40, 40],
