@@ -10,26 +10,54 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <title>Foretias Map</title>
     <style>
+        /* body, .panel-container, .dashboard-container, main {
+ background-color: rgba(0,0,0,0)!important;
+} */
         body {
             margin: 0;
             padding: 0;
-            /* background: rgba(0, 0, 0, 0); */
-
+            /* background-color: transparent; */
+            /* background-color: rgba(0, 0, 0, 0); */
+        } 
+        :root{
+            background-color: rgba(0, 0, 0, 0);
         }
-
         #map {
             position: absolute;
             height: 100vh;
             width: 100vw;
             top: 0;
             left: 0;
-            /* background: rgba(0, 0, 0, 0); */
-            /* background: pink; */
+            background-color: rgba(0, 0, 0, 0);
+            /* background-color: transparent; */
+            /* background: #afc0cf; */
         }
+        
+        /* .leaflet-control-layers-expamded {
+            background-color: none !important;
+        } */
 
-        .leaflet-control-layers-expamded {
-            background: none !important;
-        }
+        /* .leaflet-popup-content-wrapper, .leaflet-popup.tip {
+            background-color: #000
+        } */
+
+        /* .leaflet-tooltip {
+            position: absolute;
+            padding: 6px;
+            background-color: #000;
+            border: 1px solid #fff;
+            border-radius: 3px;
+            color: #222;
+            white-space: nowrap;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            pointer-events: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        } */
+
+
 
         @keyframes fade {
             from {
@@ -45,10 +73,15 @@
             display: none;
         }
     </style>
+
 </head>
 
 <body>
-    <div id="map"></div>
+
+    <!-- <h1>aaaaa</h1> -->
+    <div id="map">
+    </div>
+
 
     <script>
         var sPageURL = decodeURIComponent(window.location.search.substring(1));
@@ -69,8 +102,10 @@
         // var map = L.map('map').setView([13.65380, 100.66408], 17);
         var map = L.map('map', {
             crs: L.CRS.Simple,
-            minZoom: -2
+            minZoom: -2,
+            // style: {color: "#000", weight: 2, fillColor: "#03a6fa", fillOpacity: 0.5}
         });
+
         // var bounds = [[0, 0], [1000, 1000]];
         var bounds = [[0, 0], [1080, 1920]];
         // var image = L.imageOverlay('images/Forest-2.png', bounds).addTo(map);
@@ -78,13 +113,14 @@
         map.fitBounds(bounds);
 
         map.setView([540, 960], -1);
+       
 
         const obj = JSON.parse(param);
         console.log(obj);
 
         for (let i in obj) {
             obj[i].polygon = JSON.parse(obj[i].polygon)
-            
+
             // console.log(obj[i].name);
             // console.log(obj[i].polygon);
             // var color = 'rgba(76, 169, 94, 1)'
@@ -111,7 +147,7 @@
                 polygon.on('click', function () {
                     window.open(obj[i].link, "_top");
                 });
-            } else if(obj[i].polygon.length != 0) {
+            } else if (obj[i].polygon.length != 0) {
                 var LeafIcon = L.Icon.extend({
                     options: {
                         iconSize: [40, 40],
@@ -135,6 +171,7 @@
 
         }
     </script>
+
 </body>
 
 </html>
