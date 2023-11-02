@@ -144,9 +144,9 @@
                 polygon.bindTooltip(obj[i].name, { closeOnClick: false });
 
                 // // Add an onClick event to forward to obj[i].link
-                // polygon.on('click', function () {
-                //     window.open(obj[i].link, "_top");
-                // });
+                polygon.on('click', function () {
+                    window.open(obj[i].link, "_top");
+                });
             } else if (obj[i].polygon.length != 0) {
                 var LeafIcon = L.Icon.extend({
                     options: {
@@ -171,14 +171,14 @@
 
         }
 
-        var str = '';
-        function onMapClick(e) {
-            str += ("[" + e.latlng.lat + ", " + e.latlng.lng + "],")
-            // alert("[" + e.latlng.lat + ", " + e.latlng.lng + "]");
-            alert(str)
-        }
+        // var str = '';
+        // function onMapClick(e) {
+        //     str += ("[" + e.latlng.lat + ", " + e.latlng.lng + "],")
+        //     // alert("[" + e.latlng.lat + ", " + e.latlng.lng + "]");
+        //     alert(str)
+        // }
 
-        map.on('click', onMapClick);
+        // map.on('click', onMapClick);
     </script>
 
 </body>
