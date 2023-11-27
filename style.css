@@ -1,0 +1,28 @@
+body, :root {
+    background-color: rgba(0, 0, 0, 0.9);
+    margin: 0;
+    padding: 0;
+}
+
+#map {
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+@keyframes fade {
+    from {
+        opacity: 0.5;
+    }
+}
+
+.blinking {
+    animation: fade 1s infinite alternate;
+}
+
+.leaflet-bottom.leaflet-right .leaflet-control-attribution {
+    display: none;
+}
