@@ -1,3 +1,5 @@
+import config from './config.js';
+
 export async function fetchData() {
     function parseQueryString(queryString) {
         return Object.fromEntries(new URLSearchParams(queryString));
@@ -14,9 +16,10 @@ export async function fetchData() {
             else param = sParameterName[0] + '=' + sParameterName[1]
         }
         const obj = parseQueryString(param)
-        console.log(obj)
+        // console.log(obj)
+        const { rootUrl,  authToken } = config;
 
-        const apiUrl = 'http://uranus3.dtgo.com:8055/items/devices';
+        const apiUrl = `${rootUrl}/items/devices`;
         const filters = {
             'filter[zone_id][floor_id][_eq]': obj.floor_id,
             'filter[device_model_id][_in]': obj.device_model_id
@@ -26,14 +29,22 @@ export async function fetchData() {
         const apiUrlWithParams = new URL(apiUrl);
         apiUrlWithParams.search = new URLSearchParams(filters).toString() + `&fields=${fields}`;
 
-        const response = await fetch(apiUrlWithParams);
+        const headers = {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json' 
+        };
+
+        const response = await fetch(apiUrlWithParams, {
+            method: 'GET', 
+            headers: headers
+        });
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log(data);
+        console.log(data.data);
         return data.data;
     } catch (error) {
         console.error('Error:', error);
