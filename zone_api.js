@@ -6,9 +6,11 @@ export async function fetchData() {
         return Object.fromEntries(new URLSearchParams(queryString));
     }
     async function callAPI(apiUrl, filters, fields) {
-        const apiUrlWithParams = new URL(apiUrl);
-        apiUrlWithParams.search = new URLSearchParams(filters).toString() + `&fields=${fields}`;
-
+        // const apiUrlWithParams = new URL`${rootUrl}${apiUrl}`;
+        // apiUrlWithParams.search = new URLSearchParams(filters).toString() + `&fields=${fields}`;
+        const apiUrlWithParams = new URL(`${rootUrl}`);
+        apiUrlWithParams.search = `?param=${apiUrl}?` + new URLSearchParams(filters).toString() + `&fields=${fields}`;
+        console.log(apiUrlWithParams)
         const headers = {
             Authorization: `Bearer ${authToken}`,
             'Content-Type': 'application/json'
@@ -58,7 +60,7 @@ export async function fetchData() {
 
         if (obj.floors.length == 1) {
             //use floor show device
-            var apiUrl = `${rootUrl}/items/floors`;
+            var apiUrl = `/items/floors`;
             var filters = {
                 'filter[id][_eq]': obj.floors[0]
             };
@@ -68,7 +70,7 @@ export async function fetchData() {
             output.image = data[0].image
 
 
-            apiUrl = `${rootUrl}/items/devices`;
+            apiUrl = `/items/devices`;
             filters = {
                 'filter[zone_id][floor_id][_eq]': obj.floors[0],
                 // 'filter[device_model_id][_in]': obj.device_model_id
@@ -89,7 +91,7 @@ export async function fetchData() {
             
 
             // for dev DB
-            apiUrl = `${rootUrl}/items/camera_device`;
+            apiUrl = `/items/camera_device`;
             filters = {
                 'filter[zone_id][floor_id][_eq]': obj.floors[0],
                 // 'filter[device_model_id][_in]': obj.device_model_id
@@ -114,7 +116,7 @@ export async function fetchData() {
 
         } else if (obj.buildings.length == 1) {
             //use buildings show polygon floors
-            var apiUrl = `${rootUrl}/items/buildings`;
+            var apiUrl = `/items/buildings`;
             var filters = {
                 'filter[id][_eq]': obj.buildings[0]
             };
@@ -123,7 +125,7 @@ export async function fetchData() {
             // console.log(data)
             output.image = data[0].image
 
-            apiUrl = `${rootUrl}/items/floors`;
+            apiUrl = `/items/floors`;
             filters = {
                 'filter[building_id][_eq]': obj.buildings[0]
                 // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
@@ -142,7 +144,7 @@ export async function fetchData() {
 
         } else if (obj.projects.length == 1) {
             //use projects show polygon buildings
-            var apiUrl = `${rootUrl}/items/projects`;
+            var apiUrl = `/items/projects`;
             var filters = {
                 'filter[id][_eq]': obj.projects[0]
             };
@@ -151,7 +153,7 @@ export async function fetchData() {
             // console.log(data)
             output.image = data[0].image
 
-            apiUrl = `${rootUrl}/items/buildings`;
+            apiUrl = `/items/buildings`;
             filters = {
                 'filter[project_id][_eq]': obj.projects[0]
                 // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
@@ -169,7 +171,7 @@ export async function fetchData() {
 
         } else {
             //use theme project(ALL) show polygon projects
-            var apiUrl = `${rootUrl}/items/projects`;
+            var apiUrl = `/items/projects`;
             var filters = {
                 'filter[id][_eq]': obj.projects[0]
             };
@@ -179,7 +181,7 @@ export async function fetchData() {
             output.image = data[0].theme_project_id.image
             const theme_project_id = data[0].theme_project_id.id
 
-            apiUrl = `${rootUrl}/items/projects`;
+            apiUrl = `/items/projects`;
             filters = {
                 'filter[theme_project_id][_eq]': theme_project_id,
                 // 'filter[zone_id][floor_id][_eq]': obj.floor_id,

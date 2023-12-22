@@ -1,6 +1,8 @@
 const config = {
-    rootUrl: 'http://uranus3.dtgo.com:8055',
-authToken: 'i3uolsWdjY0M2ahiMBbklETl8tR8H4IK' // replace with your actual token
+    //     rootUrl: 'http://uranus3.dtgo.com:8055',
+    // authToken: 'i3uolsWdjY0M2ahiMBbklETl8tR8H4IK' // replace with your actual token
+    rootUrl: 'https://moon.mqdc.com/flows/trigger/58979807-19f7-469f-abad-bf3b86fa37d4',
+    authToken: 'jGuz_o7f1UsInlJAp_MCNKLO4cTD0r3U'
 };
 
 export default config;
