@@ -186,20 +186,40 @@ export async function fetchData() {
 
             apiUrl = `/items/buildings`;
             filters = {
-                'filter[project_id][_eq]': obj.projects[0]
+                'filter[project_id][_eq]': obj.projects[0],
+                // 'filter[status][_eq]': true
                 // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
                 // 'filter[device_model_id][_in]': obj.device_model_id
             };
-            fields = 'name,polygon,id';
+            fields = 'name,polygon,id%26filter%5Bstatus%5D%5B_eq%5D=true'; //%26filter%5Bstatus%7D%5B_eq%7D: true
             data = await callAPI(apiUrl, filters, fields)
 
             const mappedData = data.map(item => ({
+                id: item.id,
                 name: item.name,
                 position: item.polygon,
                 link: `${securityUrl}?var-v_projects=${obj.projects[0]}&var-v_buildings=${item.id}`,
                 // Include other fields as needed
             }));
             output.item = mappedData;
+            for (var i = 0; i < output.item.length; i++) {
+                apiUrl = `/items/fault_code_reports`;
+                filters = {
+                    'filter': `{"_and":[{"_or":[{"status":{"_in":["firing","acknowledged"]}} , {"status":{"_null":true}}]} , { "device_id": { "zone_id" :{ "floor_id" :{ "building_id" :{ "id" :{ "_eq": "${output.item[i].id}" }}}}}}]}`,
+                    // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
+                    // 'filter[device_model_id][_in]': obj.device_model_id
+                };
+                fields = `status,error_code,device_id.id,device_id.name,device_id.zone_id.floor_id.building_id.project_id.name%26groupBy=status%26aggregate%5Bcount%7D=*`;
+                data = await callAPI(apiUrl, filters, fields)
+                
+                if (data.length === 0) {
+                    output.item[i].status = "resolved";
+                } else if (data.length === 1 && data[0].status !== null) {
+                    output.item[i].status = data[0].status;
+                } else {
+                    output.item[i].status = "firing";
+                }
+            }
 
         } else {
             //use theme project(ALL) show polygon projects
