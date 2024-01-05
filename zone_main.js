@@ -39,6 +39,10 @@ async function init() {
                 offset: [0, -45],
                 direction: 'top'
             });
+            marker.on('click', function () {
+                // Open the link when the marker is clicked
+                window.open(data.item[i].link, '_top');
+            });
             markers.addLayer(marker);
         } else {
             const coordinates = data.item[i].position.split("],[")

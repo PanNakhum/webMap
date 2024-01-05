@@ -1,7 +1,7 @@
 import config from './config.js';
 
 export async function fetchData() {
-    const { rootUrl, authToken } = config;
+    const { rootUrl, authToken, securityUrl, eventDetailUrl, energyDetailUrl} = config;
     function parseQueryString(queryString) {
         return Object.fromEntries(new URLSearchParams(queryString));
     }
@@ -10,7 +10,7 @@ export async function fetchData() {
         // apiUrlWithParams.search = new URLSearchParams(filters).toString() + `&fields=${fields}`;
         const apiUrlWithParams = new URL(`${rootUrl}`);
         apiUrlWithParams.search = `?param=${apiUrl}?` + new URLSearchParams(filters).toString() + `%26fields=${fields}`;
-        console.log(apiUrlWithParams)
+        // console.log(apiUrlWithParams)
         const headers = {
             Authorization: `Bearer ${authToken}`,
             'Content-Type': 'application/json'
@@ -84,7 +84,9 @@ export async function fetchData() {
             const mappedData = data.map(item => ({
                 name: item.name,
                 position: item.x_position + ',' + item.y_position,
-                icon: item.device_model_id.icon
+                icon: item.device_model_id.icon,
+                id: item.id,
+                link: `${energyDetailUrl}?var-device_id=${item.id}`
                 // Include other fields as needed
             }));
             output.item = mappedData;
@@ -105,14 +107,26 @@ export async function fetchData() {
             const mappedData2 = data.map(item => ({
                 name: item.name,
                 position: item.pos_x + ',' + item.pos_y,
-                icon: item.device_model_id.icon
+                icon: item.device_model_id.icon,
+                id: item.id,
                 // Include other fields as needed
             }));
+
             output.item = output.item || [];
             output.item = output.item.concat(mappedData2);
-
-
-            console.log(data)
+            for (var i = 0; i < output.item.length; i++) {
+                apiUrl = `/items/fault_code_reports`;
+                filters = {
+                    'filter': `{"_and":[{"_or":[{"status":{"_in":["firing","acknowledged"]}} , {"status":{"_null":true}}]} , { "device_id": { "id" :{ "_eq": "${output.item[i].id}" }}}]}`,
+                };
+                fields = `id,status,error_code.code,error_code.name,error_code.icon,device_id.id,device_id.name%26limit=1`;
+                data = await callAPI(apiUrl, filters, fields)
+                // console.log(data)
+                if (data.length !== 0) {
+                    output.item[i].icon = data[0].error_code.icon;
+                    output.item[i].link = `${eventDetailUrl}?var-event_id=${data[0].id}`
+                }
+            }
 
         } else if (obj.buildings.length == 1) {
             //use buildings show polygon floors
@@ -139,8 +153,25 @@ export async function fetchData() {
                 name: item.name,
                 position: item.polygon,
                 id: item.id,
+                link: `${securityUrl}?var-v_projects=${obj.projects[0]}&var-v_buildings=${obj.buildings[0]}&var-v_floors=${item.id}`
             }));
             output.item = mappedData;
+            for (var i = 0; i < output.item.length; i++) {
+                apiUrl = `/items/fault_code_reports`;
+                filters = {
+                    'filter': `{"_and":[{"_or":[{"status":{"_in":["firing","acknowledged"]}} , {"status":{"_null":true}}]} , { "device_id": { "zone_id" :{ "floor_id" :{ "id" :{ "_eq": "${output.item[i].id}" }}}}}]}`,
+                };
+                fields = `status,error_code,device_id.id,device_id.name,device_id.zone_id.floor_id.building_id.project_id.name%26groupBy=status%26aggregate%5Bcount%7D=*`;
+                data = await callAPI(apiUrl, filters, fields)
+                
+                if (data.length === 0) {
+                    output.item[i].status = "resolved";
+                } else if (data.length === 1 && data[0].status !== null) {
+                    output.item[i].status = data[0].status;
+                } else {
+                    output.item[i].status = "firing";
+                }
+            }
 
         } else if (obj.projects.length == 1) {
             //use projects show polygon buildings
@@ -159,12 +190,13 @@ export async function fetchData() {
                 // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
                 // 'filter[device_model_id][_in]': obj.device_model_id
             };
-            fields = 'name,polygon';
+            fields = 'name,polygon,id';
             data = await callAPI(apiUrl, filters, fields)
 
             const mappedData = data.map(item => ({
                 name: item.name,
                 position: item.polygon,
+                link: `${securityUrl}?var-v_projects=${obj.projects[0]}&var-v_buildings=${item.id}`,
                 // Include other fields as needed
             }));
             output.item = mappedData;
@@ -187,11 +219,13 @@ export async function fetchData() {
                 // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
                 // 'filter[device_model_id][_in]': obj.device_model_id
             };
-            fields = 'name,polygon';
+            fields = 'name,polygon,id';
             data = await callAPI(apiUrl, filters, fields)
             const mappedData = data.map(item => ({
                 name: item.name,
                 position: item.polygon,
+                id : item.id,
+                link: `${securityUrl}?var-v_projects=${item.id}`,
                 // Include other fields as needed
             }));
             output.item = mappedData;
@@ -199,12 +233,13 @@ export async function fetchData() {
             for (var i = 0; i < output.item.length; i++) {
                 apiUrl = `/items/fault_code_reports`;
                 filters = {
-                    'filter': `{"_and":[{"_or":[{"status":{"_in":["firing","acknowledged"]}} , {"status":{"_null":true}}]} , { "device_id": { "zone_id" :{ "floor_id" :{ "building_id" :{ "project_id" :{ "name" :{ "_eq": "${output.item[i].name}" }}}}}}}]}`,
+                    'filter': `{"_and":[{"_or":[{"status":{"_in":["firing","acknowledged"]}} , {"status":{"_null":true}}]} , { "device_id": { "zone_id" :{ "floor_id" :{ "building_id" :{ "project_id" :{ "id" :{ "_eq": "${output.item[i].id}" }}}}}}}]}`,
                     // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
                     // 'filter[device_model_id][_in]': obj.device_model_id
                 };
                 fields = `status,error_code,device_id.id,device_id.name,device_id.zone_id.floor_id.building_id.project_id.name%26groupBy=status%26aggregate%5Bcount%7D=*`;
                 data = await callAPI(apiUrl, filters, fields)
+                
                 if (data.length === 0) {
                     output.item[i].status = "resolved";
                 } else if (data.length === 1 && data[0].status !== null) {
@@ -212,7 +247,6 @@ export async function fetchData() {
                 } else {
                     output.item[i].status = "firing";
                 }
-                
             }
 
         }
