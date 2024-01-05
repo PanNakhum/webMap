@@ -16,7 +16,7 @@ async function init() {
 
     for (let i in data.item) {
         var color = 'rgba(0, 0, 0, 0)';
-        color = 'rgba(243, 175, 61, 1)'
+        // color = 'rgba(243, 175, 61, 1)'
         if (data.item[i].status == 'firing') {
             color = 'rgba(236, 99, 64, 1)';
         } else if (data.item[i].status == 'acknowledged') {
@@ -50,10 +50,13 @@ async function init() {
                 fillColor: color, //'rgba(236, 99, 64, 1)', // Fill color of the polygon
                 fillOpacity: 0.7  // Opacity of the fill color (0 is fully transparent, 1 is fully opaque)
             }).addTo(map);
+            
+
 
             // Add a tooltip to the polygon with closeOnClick set to false
             polygon.bindTooltip(data.item[i].name, { closeOnClick: false });
-
+            // polygon.bindPopup(data.item[i].name);
+            
             // // Add an onClick event to forward to obj[i].link
             polygon.on('click', function () {
                 window.open(data.item[i].link, "_top");

@@ -9,7 +9,7 @@ export async function fetchData() {
         // const apiUrlWithParams = new URL`${rootUrl}${apiUrl}`;
         // apiUrlWithParams.search = new URLSearchParams(filters).toString() + `&fields=${fields}`;
         const apiUrlWithParams = new URL(`${rootUrl}`);
-        apiUrlWithParams.search = `?param=${apiUrl}?` + new URLSearchParams(filters).toString() + `&fields=${fields}`;
+        apiUrlWithParams.search = `?param=${apiUrl}?` + new URLSearchParams(filters).toString() + `%26fields=${fields}`;
         console.log(apiUrlWithParams)
         const headers = {
             Authorization: `Bearer ${authToken}`,
@@ -78,7 +78,7 @@ export async function fetchData() {
             console.log(obj.device_model_id)
             if (obj.device_model_id !== undefined && obj.device_model_id !== null) {
                 filters['filter[device_model_id][_in]'] = obj.device_model_id;
-              }
+            }
             fields = 'id,name,x_position,y_position,device_model_id.icon,zone_id.name,zone_id.floor_id.name,zone_id.floor_id.building_id.name,zone_id.floor_id.building_id.project_id.name,zone_id.floor_id.image';
             data = await callAPI(apiUrl, filters, fields)
             const mappedData = data.map(item => ({
@@ -88,7 +88,7 @@ export async function fetchData() {
                 // Include other fields as needed
             }));
             output.item = mappedData;
-            
+
 
             // for dev DB
             apiUrl = `/items/camera_device`;
@@ -99,7 +99,7 @@ export async function fetchData() {
             console.log(obj.device_model_id)
             if (obj.device_model_id !== undefined && obj.device_model_id !== null) {
                 filters['filter[device_model_id][_in]'] = obj.device_model_id;
-              }
+            }
             fields = 'id,name,pos_x,pos_y,device_model_id.icon,zone_id.name,zone_id.floor_id.name,zone_id.floor_id.building_id.name,zone_id.floor_id.building_id.project_id.name,zone_id.floor_id.image';
             data = await callAPI(apiUrl, filters, fields)
             const mappedData2 = data.map(item => ({
@@ -189,13 +189,31 @@ export async function fetchData() {
             };
             fields = 'name,polygon';
             data = await callAPI(apiUrl, filters, fields)
-
             const mappedData = data.map(item => ({
                 name: item.name,
                 position: item.polygon,
                 // Include other fields as needed
             }));
             output.item = mappedData;
+
+            for (var i = 0; i < output.item.length; i++) {
+                apiUrl = `/items/fault_code_reports`;
+                filters = {
+                    'filter': `{"_and":[{"_or":[{"status":{"_in":["firing","acknowledged"]}} , {"status":{"_null":true}}]} , { "device_id": { "zone_id" :{ "floor_id" :{ "building_id" :{ "project_id" :{ "name" :{ "_eq": "${output.item[i].name}" }}}}}}}]}`,
+                    // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
+                    // 'filter[device_model_id][_in]': obj.device_model_id
+                };
+                fields = `status,error_code,device_id.id,device_id.name,device_id.zone_id.floor_id.building_id.project_id.name%26groupBy=status%26aggregate%5Bcount%7D=*`;
+                data = await callAPI(apiUrl, filters, fields)
+                if (data.length === 0) {
+                    output.item[i].status = "resolved";
+                } else if (data.length === 1 && data[0].status !== null) {
+                    output.item[i].status = data[0].status;
+                } else {
+                    output.item[i].status = "firing";
+                }
+                
+            }
 
         }
         // const data_ = 
