@@ -6,10 +6,10 @@ export async function fetchData() {
         return Object.fromEntries(new URLSearchParams(queryString));
     }
     async function callAPI(apiUrl, filters, fields) {
-        // const apiUrlWithParams = new URL`${rootUrl}${apiUrl}`;
-        // apiUrlWithParams.search = new URLSearchParams(filters).toString() + `&fields=${fields}`;
-        const apiUrlWithParams = new URL(`${rootUrl}`);
-        apiUrlWithParams.search = `?param=${apiUrl}?` + new URLSearchParams(filters).toString() + `%26fields=${fields}`;
+        const apiUrlWithParams = new URL(`${rootUrl}${apiUrl}`);
+        apiUrlWithParams.search = new URLSearchParams(filters).toString() + `&fields=${fields}`;
+        // const apiUrlWithParams = new URL(`${rootUrl}`);
+        // apiUrlWithParams.search = `?param=${apiUrl}?` + new URLSearchParams(filters).toString() + `%26fields=${fields}`;
         // console.log(apiUrlWithParams)
         const headers = {
             Authorization: `Bearer ${authToken}`,
