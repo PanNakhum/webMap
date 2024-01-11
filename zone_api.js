@@ -6,10 +6,10 @@ export async function fetchData() {
         return Object.fromEntries(new URLSearchParams(queryString));
     }
     async function callAPI(apiUrl, filters, fields) {
-        const apiUrlWithParams = new URL(`${rootUrl}${apiUrl}`);
-        apiUrlWithParams.search = new URLSearchParams(filters).toString() + `&fields=${fields}`;
-        // const apiUrlWithParams = new URL(`${rootUrl}`);
-        // apiUrlWithParams.search = `?param=${apiUrl}?` + new URLSearchParams(filters).toString() + `%26fields=${fields}`;
+        // const apiUrlWithParams = new URL(`${rootUrl}${apiUrl}`);
+        // apiUrlWithParams.search = new URLSearchParams(filters).toString() + `&fields=${fields}`;
+        const apiUrlWithParams = new URL(`${rootUrl}`);
+        apiUrlWithParams.search = `?param=${apiUrl}?` + new URLSearchParams(filters).toString() + `%26fields=${fields}`;
         console.log(apiUrlWithParams)
         const headers = {
             Authorization: `Bearer ${authToken}`,
@@ -156,6 +156,7 @@ export async function fetchData() {
                 link: `${securityUrl}?var-v_projects=${obj.projects[0]}&var-v_buildings=${obj.buildings[0]}&var-v_floors=${item.id}`
             }));
             output.item = mappedData;
+            
             for (var i = 0; i < output.item.length; i++) {
                 apiUrl = `/items/fault_code_reports`;
                 filters = {
@@ -191,7 +192,7 @@ export async function fetchData() {
                 // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
                 // 'filter[device_model_id][_in]': obj.device_model_id
             };
-            fields = 'name,polygon,id%26filter%5Bstatus%5D%5B_eq%5D=true'; //%26filter%5Bstatus%7D%5B_eq%7D: true
+            fields = 'id,name,polygon,id&filter[status][_eq]=true' //%26filter%5Bstatus%5D%5B_eq%5D=true'; //%26filter%5Bstatus%7D%5B_eq%7D: true
             data = await callAPI(apiUrl, filters, fields)
 
             const mappedData = data.map(item => ({
@@ -202,6 +203,7 @@ export async function fetchData() {
                 // Include other fields as needed
             }));
             output.item = mappedData;
+            console.log(output)
             for (var i = 0; i < output.item.length; i++) {
                 apiUrl = `/items/fault_code_reports`;
                 filters = {
