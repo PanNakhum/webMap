@@ -192,7 +192,7 @@ export async function fetchData() {
                 // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
                 // 'filter[device_model_id][_in]': obj.device_model_id
             };
-            fields = 'id,name,polygon,id&filter[status][_eq]=true' //%26filter%5Bstatus%5D%5B_eq%5D=true'; //%26filter%5Bstatus%7D%5B_eq%7D: true
+            fields = 'id,name,polygon,id%26filter%5Bstatus%5D%5B_eq%5D=true'; //%26filter%5Bstatus%7D%5B_eq%7D: true  &filter[status][_eq]=true'
             data = await callAPI(apiUrl, filters, fields)
 
             const mappedData = data.map(item => ({
