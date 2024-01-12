@@ -1,7 +1,7 @@
 import config from './config.js';
 
 export async function fetchData() {
-    const { rootUrl, authToken, securityUrl, eventDetailUrl, energyDetailUrl} = config;
+    const { rootUrl, authToken, securityUrl, eventDetailUrl, energyDetailUrl } = config;
     function parseQueryString(queryString) {
         return Object.fromEntries(new URLSearchParams(queryString));
     }
@@ -10,7 +10,7 @@ export async function fetchData() {
         // apiUrlWithParams.search = new URLSearchParams(filters).toString() + `&fields=${fields}`;
         const apiUrlWithParams = new URL(`${rootUrl}`);
         apiUrlWithParams.search = `?param=${apiUrl}?` + new URLSearchParams(filters).toString() + `%26fields=${fields}`;
-        console.log(apiUrlWithParams)
+        // console.log(apiUrlWithParams)
         const headers = {
             Authorization: `Bearer ${authToken}`,
             'Content-Type': 'application/json'
@@ -75,7 +75,7 @@ export async function fetchData() {
                 'filter[zone_id][floor_id][_eq]': obj.floors[0],
                 // 'filter[device_model_id][_in]': obj.device_model_id
             };
-            console.log(obj.device_model_id)
+            // console.log(obj.device_model_id)
             if (obj.device_model_id !== undefined && obj.device_model_id !== null) {
                 filters['filter[device_model_id][_in]'] = obj.device_model_id;
             }
@@ -98,7 +98,7 @@ export async function fetchData() {
                 'filter[zone_id][floor_id][_eq]': obj.floors[0],
                 // 'filter[device_model_id][_in]': obj.device_model_id
             };
-            console.log(obj.device_model_id)
+            // console.log(obj.device_model_id)
             if (obj.device_model_id !== undefined && obj.device_model_id !== null) {
                 filters['filter[device_model_id][_in]'] = obj.device_model_id;
             }
@@ -111,20 +111,32 @@ export async function fetchData() {
                 id: item.id,
                 // Include other fields as needed
             }));
-
             output.item = output.item || [];
             output.item = output.item.concat(mappedData2);
-            for (var i = 0; i < output.item.length; i++) {
+
+            // console.log("Line 117")
+            const idArray = output.item.map(obj => obj.id);
+            const idString = JSON.stringify(idArray);
+            // console.log(idString);
+            apiUrl = `/items/fault_code_reports`;
+            filters = {
+                'filter': `{"_and":[{"status": { "_null":true }},{"device_id":{"_in":${idString}}}]}`,
+            };
+            fields = `id%26groupBy=device_id`;
+            var error_list = await callAPI(apiUrl, filters, fields)
+            // console.log(error_list);
+            for (var i = 0; i < error_list.length; i++) {
+                // console.log(i)
                 apiUrl = `/items/fault_code_reports`;
                 filters = {
-                    'filter': `{"_and":[{"_or":[{"status":{"_in":["firing","acknowledged"]}} , {"status":{"_null":true}}]} , { "device_id": { "id" :{ "_eq": "${output.item[i].id}" }}}]}`,
+                    'filter': `{"_and":[{"_or":[{"status":{"_in":["firing","acknowledged"]}} , {"status":{"_null":true}}]} , { "device_id": { "id" :{ "_eq": "${error_list[i].device_id}" }}}]}`,
                 };
                 fields = `id,status,error_code.code,error_code.name,error_code.icon,device_id.id,device_id.name%26limit=1`;
                 data = await callAPI(apiUrl, filters, fields)
-                // console.log(data)
-                if (data.length !== 0) {
-                    output.item[i].icon = data[0].error_code.icon;
-                    output.item[i].link = `${eventDetailUrl}?var-event_id=${data[0].id}`
+                const matchingIndex = output.item.findIndex(item => item.id === error_list[i].device_id);
+                if (matchingIndex !== -1 && data.length !== 0) {
+                    output.item[matchingIndex].icon = data[0].error_code.icon;
+                    output.item[matchingIndex].link = `${eventDetailUrl}?var-event_id=${data[0].id}`
                 }
             }
 
@@ -156,7 +168,7 @@ export async function fetchData() {
                 link: `${securityUrl}?var-v_projects=${obj.projects[0]}&var-v_buildings=${obj.buildings[0]}&var-v_floors=${item.id}`
             }));
             output.item = mappedData;
-            
+
             for (var i = 0; i < output.item.length; i++) {
                 apiUrl = `/items/fault_code_reports`;
                 filters = {
@@ -164,7 +176,7 @@ export async function fetchData() {
                 };
                 fields = `status,error_code,device_id.id,device_id.name,device_id.zone_id.floor_id.building_id.project_id.name%26groupBy=status%26aggregate%5Bcount%7D=*`;
                 data = await callAPI(apiUrl, filters, fields)
-                
+
                 if (data.length === 0) {
                     output.item[i].status = "resolved";
                 } else if (data.length === 1 && data[0].status !== null) {
@@ -213,7 +225,7 @@ export async function fetchData() {
                 };
                 fields = `status,error_code,device_id.id,device_id.name,device_id.zone_id.floor_id.building_id.project_id.name%26groupBy=status%26aggregate%5Bcount%7D=*`;
                 data = await callAPI(apiUrl, filters, fields)
-                
+
                 if (data.length === 0) {
                     output.item[i].status = "resolved";
                 } else if (data.length === 1 && data[0].status !== null) {
@@ -246,7 +258,7 @@ export async function fetchData() {
             const mappedData = data.map(item => ({
                 name: item.name,
                 position: item.polygon,
-                id : item.id,
+                id: item.id,
                 link: `${securityUrl}?var-v_projects=${item.id}`,
                 // Include other fields as needed
             }));
@@ -261,7 +273,7 @@ export async function fetchData() {
                 };
                 fields = `status,error_code,device_id.id,device_id.name,device_id.zone_id.floor_id.building_id.project_id.name%26groupBy=status%26aggregate%5Bcount%7D=*`;
                 data = await callAPI(apiUrl, filters, fields)
-                
+
                 if (data.length === 0) {
                     output.item[i].status = "resolved";
                 } else if (data.length === 1 && data[0].status !== null) {
