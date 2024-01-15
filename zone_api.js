@@ -133,7 +133,7 @@ export async function fetchData() {
                 };
                 fields = `id,device_id.zone_id.floor_id.building_id.project_id.name,device_id.zone_id.floor_id.building_id.name,device_id.zone_id.floor_id.name,timestamp,status,error_code.code,error_code.name,error_code.icon,device_id.id,device_id.name%26limit=1`;
                 data = await callAPI(apiUrl, filters, fields)
-                console.log(data)
+                // console.log(data)
                 var status = `Firing`
                 if(data[0].status !== null){
                     status = data[0].status.charAt(0).toUpperCase() + data[0].status.slice(1)
