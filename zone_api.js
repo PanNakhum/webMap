@@ -131,10 +131,31 @@ export async function fetchData() {
                 filters = {
                     'filter': `{"_and":[{"_or":[{"status":{"_in":["firing","acknowledged"]}} , {"status":{"_null":true}}]} , { "device_id": { "id" :{ "_eq": "${error_list[i].device_id}" }}}]}`,
                 };
-                fields = `id,status,error_code.code,error_code.name,error_code.icon,device_id.id,device_id.name%26limit=1`;
+                fields = `id,device_id.zone_id.floor_id.building_id.project_id.name,device_id.zone_id.floor_id.building_id.name,device_id.zone_id.floor_id.name,timestamp,status,error_code.code,error_code.name,error_code.icon,device_id.id,device_id.name%26limit=1`;
                 data = await callAPI(apiUrl, filters, fields)
+                console.log(data)
+                var status = `Firing`
+                if(data[0].status !== null){
+                    status = data[0].status.charAt(0).toUpperCase() + data[0].status.slice(1)
+                }
+                const inputDateString = data[0].timestamp;
+                const inputDate = new Date(inputDateString);
+
+                const options = {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false ,
+                    timeZone: 'Asia/Bangkok' // Replace with your local timezone
+                };
+
+                const formattedDate = inputDate.toLocaleString('en-US', options);
                 const matchingIndex = output.item.findIndex(item => item.id === error_list[i].device_id);
                 if (matchingIndex !== -1 && data.length !== 0) {
+                    output.item[matchingIndex].name = `<b>Position:</b> ${data[0].device_id.zone_id.floor_id.building_id.project_id.name} - ${data[0].device_id.zone_id.floor_id.building_id.name} - ${data[0].device_id.zone_id.floor_id.name} - ${data[0].device_id.name}<br><b>Time:</b> ${formattedDate}<br><b>Error type:</b> ${data[0].error_code.name}<br><b>Status:</b> ${status}`;
                     output.item[matchingIndex].icon = data[0].error_code.icon;
                     output.item[matchingIndex].link = `${eventDetailUrl}?var-event_id=${data[0].id}`
                 }
