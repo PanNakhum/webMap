@@ -56,7 +56,7 @@ async function init() {
             var polygon = L.polygon(coordinates, {
                 color: color, //'black', // 'rgba(236, 99, 64, 1)',    // Border color of the polygon
                 fillColor: color, //'rgba(236, 99, 64, 1)', // Fill color of the polygon
-                fillOpacity: 0.7  // Opacity of the fill color (0 is fully transparent, 1 is fully opaque)
+                fillOpacity: 0.5  // Opacity of the fill color (0 is fully transparent, 1 is fully opaque)
             }).addTo(map);
             allMarkersObjArray.push(polygon)
             

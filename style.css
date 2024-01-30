@@ -23,16 +23,16 @@ body, :root {
     0% {
       opacity: 1;
     }
-    50% {
+    100% {
       opacity: 0.5;
     }
-    100% {
+    /* 100% {
       opacity: 1;
-    }
+    } */
   }
 
 .blinking {
-    animation: fade 2s infinite alternate;
+    animation: fade 1s infinite alternate;
 }
 
 .leaflet-bottom.leaflet-right .leaflet-control-attribution {

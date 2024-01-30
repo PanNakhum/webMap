@@ -29,6 +29,7 @@ export async function fetchData() {
         // console.log(data.data);
         return data.data
     }
+    const colorArray = ["#8B0000", "#ED543B", "#FFB602", "#F9D000", "#B4BB19", "#238922"];
     try {
         var sPageURL = decodeURIComponent(window.location.search.substring(1));
         var sURLVariables = sPageURL.split('&');
@@ -56,7 +57,9 @@ export async function fetchData() {
                 status: 'normal',
                 position: 'position',
                 power: 'power',
-                energy: 'energy'
+                energy: 'energy',
+                onhover: false,
+                color: '#000000'
             }
         }
 
@@ -210,10 +213,24 @@ export async function fetchData() {
                 output.item[i].power = sumPowerKw.toFixed(3);
 
                 let sumEnergyKwH = data.reduce((accumulator, currentValue) => {
-                    return accumulator + (currentValue.max.energy_kwh-currentValue.min.energy_kwh);
+                    return accumulator + (currentValue.max.energy_kwh - currentValue.min.energy_kwh);
                 }, 0);
                 output.item[i].energy = sumEnergyKwH.toFixed(3);
             }
+
+            output.item.sort((a, b) => parseFloat(a.energy) - parseFloat(b.energy));
+            for (var i = 0; i < output.item.length; i++) {
+                if(i < colorArray.length){
+                    output.item[i].color = colorArray[i]
+                }else{
+                    output.item[i].color = colorArray[colorArray.length-1]
+                }
+            }
+            
+
+
+            // output.item.sort((a, b) => parseFloat(b.energy) - parseFloat(a.energy));
+            // console.log(output.item)
 
         } else if (obj.projects.length == 1) {
             //use projects show polygon buildings
@@ -241,6 +258,7 @@ export async function fetchData() {
                 name: item.name,
                 position: item.polygon,
                 link: `${energyUrl}?var-v_projects=${obj.projects[0]}&var-v_buildings=${item.id}`,
+                onhover: true,
                 // Include other fields as needed
             }));
             output.item = mappedData;
@@ -263,9 +281,17 @@ export async function fetchData() {
                 output.item[i].power = sumPowerKw.toFixed(3);
 
                 let sumEnergyKwH = data.reduce((accumulator, currentValue) => {
-                    return accumulator + (currentValue.max.energy_kwh-currentValue.min.energy_kwh);
+                    return accumulator + (currentValue.max.energy_kwh - currentValue.min.energy_kwh);
                 }, 0);
                 output.item[i].energy = sumEnergyKwH.toFixed(3);
+            }
+            output.item.sort((a, b) => parseFloat(a.energy) - parseFloat(b.energy));
+            for (var i = 0; i < output.item.length; i++) {
+                if(i < colorArray.length){
+                    output.item[i].color = colorArray[i]
+                }else{
+                    output.item[i].color = colorArray[colorArray.length-1]
+                }
             }
 
         } else {
@@ -293,6 +319,7 @@ export async function fetchData() {
                 position: item.polygon,
                 id: item.id,
                 link: `${energyUrl}?var-v_projects=${item.id}`,
+                onhover: true,
                 // Include other fields as needed
             }));
             output.item = mappedData;
@@ -315,9 +342,10 @@ export async function fetchData() {
                 output.item[i].power = sumPowerKw.toFixed(3);
 
                 let sumEnergyKwH = data.reduce((accumulator, currentValue) => {
-                    return accumulator + (currentValue.max.energy_kwh-currentValue.min.energy_kwh);
+                    return accumulator + (currentValue.max.energy_kwh - currentValue.min.energy_kwh);
                 }, 0);
                 output.item[i].energy = sumEnergyKwH.toFixed(3);
+
                 // console.log(sumEnergyKwH);
 
                 // if (data.length === 0) {
@@ -327,6 +355,14 @@ export async function fetchData() {
                 // } else {
                 //     output.item[i].status = "firing";
                 // }
+            }
+            output.item.sort((a, b) => parseFloat(a.energy) - parseFloat(b.energy));
+            for (var i = 0; i < output.item.length; i++) {
+                if(i < colorArray.length){
+                    output.item[i].color = colorArray[i]
+                }else{
+                    output.item[i].color = colorArray[colorArray.length-1]
+                }
             }
 
         }

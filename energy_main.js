@@ -16,10 +16,10 @@ async function init() {
     var markers = L.layerGroup().addTo(map);
 
     for (let i in data.item) {
-        var color = 'rgba(243, 175, 61, 1)';
-        if (data.item[i].power > 700) {
-            color = 'rgba(236, 99, 64, 1)';
-        }
+        // var color = 'rgba(243, 175, 61, 1)';
+        // if (data.item[i].power > 700) {
+        //     color = 'rgba(236, 99, 64, 1)';
+        // }
         // var color = 'rgba(0, 0, 0, 0)';
         // // color = 'rgba(243, 175, 61, 1)'
         // if (data.item[i].status == 'firing') {
@@ -33,7 +33,7 @@ async function init() {
                 options: {
                     iconSize: [40, 40],
                     iconAnchor: [20, 40],
-                    color: color,
+                    // color: color,
                     className: 'blinking',
                     iconUrl: data.item[i].icon
                 }
@@ -57,39 +57,28 @@ async function init() {
                 .map(coord => coord.split(",").map(Number));
             // console.log(coordinates)
             var polygon = L.polygon(coordinates, {
-                color: color, //'black', // 'rgba(236, 99, 64, 1)',    // Border color of the polygon
-                fillColor: color, //'rgba(236, 99, 64, 1)', // Fill color of the polygon
-                fillOpacity: 0.7  // Opacity of the fill color (0 is fully transparent, 1 is fully opaque)
+                color: data.item[i].color, //'black', // 'rgba(236, 99, 64, 1)',    // Border color of the polygon
+                fillColor: data.item[i].color, //'rgba(236, 99, 64, 1)', // Fill color of the polygon
+                fillOpacity: 0.5  // Opacity of the fill color (0 is fully transparent, 1 is fully opaque)
             }).addTo(map);
             polygon._path.classList.add('blinking');
 
-            polygon.bindTooltip(`<b>${data.item[i].name}</b><br><b>Power: </b>${parseFloat(data.item[i].power).toLocaleString()} kW<br><b>Energy(Day): </b>${parseFloat(data.item[i].energy).toLocaleString()} kWh`, {
-                permanent: true,
-                direction: 'center',
-                className: 'custom-tooltip',
-                opacity: '1'
-            });
-            // tooltip.setStyle({ backgroundColor: 'yellow' });
-            // console.log(polygon)
+            if(data.item[1].onhover === true){
+                polygon.bindTooltip(`<b>${data.item[i].name}</b><br><b>Power: </b>${parseFloat(data.item[i].power).toLocaleString()} kW<br><b>Energy(Day): </b>${parseFloat(data.item[i].energy).toLocaleString()} kWh`, {
+                    permanent: true,
+                    direction: 'center',
+                    className: 'custom-tooltip',
+                    opacity: '1'
+                });
+            }else{
+                polygon.bindTooltip(`<b>${data.item[i].name}</b><br><b>Power: </b>${parseFloat(data.item[i].power).toLocaleString()} kW<br><b>Energy(Day): </b>${parseFloat(data.item[i].energy).toLocaleString()} kWh`, { closeOnClick: false });
+            }
+            
 
             // Add the polygon to the map
             polygon.addTo(map);
 
             allMarkersObjArray.push(polygon)
-
-            // Add a tooltip to the polygon with closeOnClick set to false
-            // polygon.bindTooltip(data.item[i].name, { closeOnClick: false });
-            // polygon.openTooltip();
-            // polygon.bindPopup(data.item[i].name).openPopup();
-            // polygon.on('mouseout', function () {
-            //     polygon.bindTooltip(data.item[i].name, { closeOnClick: false }).openTooltip();
-            // });
-            // polygon.on('mouseover', function () {
-            //     tooltip.openTooltip();
-            // });
-
-            // Open the tooltip by default
-            // tooltip.openTooltip();
 
             // // Add an onClick event to forward to obj[i].link
             polygon.on('click', function () {
@@ -111,7 +100,7 @@ async function init() {
 
 
         for (let i in data.item) {
-            var color = 'rgba(243, 175, 61, 1)';
+            // var color = 'rgba(243, 175, 61, 1)';
             // var color = 'rgba(0, 0, 0, 0)';
             // // color = 'rgba(243, 175, 61, 1)'
             // if (data.item[i].status == 'firing') {
@@ -125,7 +114,7 @@ async function init() {
                     options: {
                         iconSize: [40, 40],
                         iconAnchor: [20, 40],
-                        color: color,
+                        // color: color,
                         className: 'blinking',
                         iconUrl: data.item[i].icon
                     }
@@ -149,18 +138,22 @@ async function init() {
                     .map(coord => coord.split(",").map(Number));
                 // console.log(coordinates)
                 var polygon = L.polygon(coordinates, {
-                    color: color, //'black', // 'rgba(236, 99, 64, 1)',    // Border color of the polygon
-                    fillColor: color, //'rgba(236, 99, 64, 1)', // Fill color of the polygon
+                    color: data.item[i].color, //'black', // 'rgba(236, 99, 64, 1)',    // Border color of the polygon
+                    fillColor: data.item[i].color, //'rgba(236, 99, 64, 1)', // Fill color of the polygon
                     fillOpacity: 0.7  // Opacity of the fill color (0 is fully transparent, 1 is fully opaque)
                 }).addTo(map);
                 polygon._path.classList.add('blinking');
                 // console.log(color)
-                polygon.bindTooltip(`<b>${data.item[i].name}</b><br><b>Power: </b>${parseFloat(data.item[i].power).toLocaleString()} kW<br><b>Energy(Day): </b>${parseFloat(data.item[i].energy).toLocaleString()} kWh`, {
-                    permanent: true,
-                    direction: 'center',
-                    className: 'custom-tooltip',
-                    opacity: '1'
-                });
+                if(data.item[1].onhover === true){
+                    polygon.bindTooltip(`<b>${data.item[i].name}</b><br><b>Power: </b>${parseFloat(data.item[i].power).toLocaleString()} kW<br><b>Energy(Day): </b>${parseFloat(data.item[i].energy).toLocaleString()} kWh`, {
+                        permanent: true,
+                        direction: 'center',
+                        className: 'custom-tooltip',
+                        opacity: '1'
+                    });
+                }else{
+                    polygon.bindTooltip(`<b>${data.item[i].name}</b><br><b>Power: </b>${parseFloat(data.item[i].power).toLocaleString()} kW<br><b>Energy(Day): </b>${parseFloat(data.item[i].energy).toLocaleString()} kWh`, { closeOnClick: false });
+                }
                 allMarkersObjArray.push(polygon)
 
 
