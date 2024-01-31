@@ -30,6 +30,7 @@ export async function fetchData() {
         return data.data
     }
     const colorArray = ["#8B0000", "#ED543B", "#FFB602", "#F9D000", "#B4BB19", "#238922"];
+    // const colorArray = ["#238922", "#B4BB19", "#F9D000", "#FFB602", "#ED543B", "#8B0000"];
     try {
         var sPageURL = decodeURIComponent(window.location.search.substring(1));
         var sURLVariables = sPageURL.split('&');
@@ -80,11 +81,13 @@ export async function fetchData() {
                 'filter[zone_id][floor_id][_eq]': obj.floors[0],
                 // 'filter[device_model_id][_in]': obj.device_model_id
             };
+            obj.device_model_id = `14cba9f1-850b-4524-a214-98a9f8d32851`
             // console.log(obj.device_model_id)
-            if (obj.device_model_id !== undefined && obj.device_model_id !== null) {
-                filters['filter[device_model_id][_in]'] = obj.device_model_id;
-            }
             fields = 'id,name,x_position,y_position,device_model_id.icon,zone_id.name,zone_id.floor_id.name,zone_id.floor_id.building_id.name,zone_id.floor_id.building_id.project_id.name,zone_id.floor_id.image';
+            if (obj.device_model_id !== undefined && obj.device_model_id !== null) {
+                fields += `${encodeURIComponent(`&filter[device_model_id][_in]=${obj.device_model_id}`)}`;
+            }
+            
             data = await callAPI(apiUrl, filters, fields)
             const mappedData = data.map(item => ({
                 name: item.name,
@@ -97,74 +100,136 @@ export async function fetchData() {
             output.item = mappedData;
 
 
-            // for dev DB
-            apiUrl = `/items/camera_device`;
+
+            apiUrl = `/items/devices`;
             filters = {
                 'filter[zone_id][floor_id][_eq]': obj.floors[0],
                 // 'filter[device_model_id][_in]': obj.device_model_id
             };
+            obj.device_model_id = `14cba9f1-850b-4524-a214-98a9f8d32851`
             // console.log(obj.device_model_id)
+            fields = 'id,polygon,name,x_position,y_position,device_model_id.icon,zone_id.name,zone_id.floor_id.name,zone_id.floor_id.building_id.name,zone_id.floor_id.building_id.project_id.name,zone_id.floor_id.image';
             if (obj.device_model_id !== undefined && obj.device_model_id !== null) {
-                filters['filter[device_model_id][_in]'] = obj.device_model_id;
+                fields += `${encodeURIComponent(`&filter[device_model_id][_in]=${obj.device_model_id}`)}`;
             }
-            fields = 'id,name,pos_x,pos_y,device_model_id.icon,zone_id.name,zone_id.floor_id.name,zone_id.floor_id.building_id.name,zone_id.floor_id.building_id.project_id.name,zone_id.floor_id.image';
             data = await callAPI(apiUrl, filters, fields)
-            const mappedData2 = data.map(item => ({
+            console.log(data)
+            var mappedData2 = output.item
+            output.item = data.map(item => ({
                 name: item.name,
-                position: item.pos_x + ',' + item.pos_y,
-                icon: item.device_model_id.icon,
+                position: item.polygon,
+                // icon: item.device_model_id.icon,
                 id: item.id,
+                onhover: true,
                 // Include other fields as needed
             }));
+            // output.item = output.item || [];
+            // output.item = output.item.concat(mappedData2);
+
+            for (var i = 0; i < output.item.length; i++) {
+                apiUrl = `/items/interval_reports`;
+                filters = {
+                    'filter': `{"_and":[{"_and":[{"timestamp":{"_lte":"$NOW"}},{"timestamp":{"_gte":"$NOW(-1day)"}}]},{"device_id":{"id":{"_eq":"${output.item[i].id}"}}}]}`,
+                    // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
+                    // 'filter[device_model_id][_in]': obj.device_model_id
+                };
+                fields = `id%26aggregate%5Bmin%5D=energy_kwh%26aggregate%5Bmax%5D=energy_kwh%26aggregate%5Bavg%5D=power_kw%26groupBy=device_id`;
+                data = await callAPI(apiUrl, filters, fields)
+
+                // console.log(data)
+
+                let sumPowerKw = data.reduce((accumulator, currentValue) => {
+                    return accumulator + currentValue.avg.power_kw;
+                }, 0);
+                output.item[i].power = sumPowerKw.toFixed(3);
+
+                let sumEnergyKwH = data.reduce((accumulator, currentValue) => {
+                    return accumulator + (currentValue.max.energy_kwh - currentValue.min.energy_kwh);
+                }, 0);
+                output.item[i].energy = sumEnergyKwH.toFixed(3);
+            }
+
+            output.item.sort((a, b) => parseFloat(b.energy) - parseFloat(a.energy));
+            for (var i = 0; i < output.item.length; i++) {
+                if(i < colorArray.length){
+                    output.item[i].color = colorArray[i]
+                }else{
+                    output.item[i].color = colorArray[colorArray.length-1]
+                }
+            }
+
             output.item = output.item || [];
             output.item = output.item.concat(mappedData2);
 
-            // console.log("Line 117")
-            const idArray = output.item.map(obj => obj.id);
-            const idString = JSON.stringify(idArray);
-            // console.log(idString);
-            apiUrl = `/items/fault_code_reports`;
-            filters = {
-                'filter': `{"_and":[{"status": { "_null":true }},{"device_id":{"_in":${idString}}}]}`,
-            };
-            fields = `id%26groupBy=device_id`;
-            var error_list = await callAPI(apiUrl, filters, fields)
-            // console.log(error_list);
-            for (var i = 0; i < error_list.length; i++) {
-                // console.log(i)
-                apiUrl = `/items/fault_code_reports`;
-                filters = {
-                    'filter': `{"_and":[{"_or":[{"status":{"_in":["firing","acknowledged"]}} , {"status":{"_null":true}}]} , { "device_id": { "id" :{ "_eq": "${error_list[i].device_id}" }}}]}`,
-                };
-                fields = `id,device_id.zone_id.floor_id.building_id.project_id.name,device_id.zone_id.floor_id.building_id.name,device_id.zone_id.floor_id.name,timestamp,status,error_code.code,error_code.name,error_code.icon,device_id.id,device_id.name%26limit=1`;
-                data = await callAPI(apiUrl, filters, fields)
-                // console.log(data)
-                var status = `Firing`
-                if (data[0].status !== null) {
-                    status = data[0].status.charAt(0).toUpperCase() + data[0].status.slice(1)
-                }
-                const inputDateString = data[0].timestamp;
-                const inputDate = new Date(inputDateString);
 
-                const options = {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false,
-                    timeZone: 'Asia/Bangkok' // Replace with your local timezone
-                };
+            // for dev DB
+            // apiUrl = `/items/camera_device`;
+            // filters = {
+            //     'filter[zone_id][floor_id][_eq]': obj.floors[0],
+            //     // 'filter[device_model_id][_in]': obj.device_model_id
+            // };
+            // // console.log(obj.device_model_id)
+            // if (obj.device_model_id !== undefined && obj.device_model_id !== null) {
+            //     filters['filter[device_model_id][_in]'] = obj.device_model_id;
+            // }
+            // fields = 'id,name,pos_x,pos_y,device_model_id.icon,zone_id.name,zone_id.floor_id.name,zone_id.floor_id.building_id.name,zone_id.floor_id.building_id.project_id.name,zone_id.floor_id.image';
+            // data = await callAPI(apiUrl, filters, fields)
+            // const mappedData2 = data.map(item => ({
+            //     name: item.name,
+            //     position: item.pos_x + ',' + item.pos_y,
+            //     icon: item.device_model_id.icon,
+            //     id: item.id,
+            //     // Include other fields as needed
+            // }));
+            // output.item = output.item || [];
+            // output.item = output.item.concat(mappedData2);
 
-                const formattedDate = inputDate.toLocaleString('en-US', options);
-                const matchingIndex = output.item.findIndex(item => item.id === error_list[i].device_id);
-                if (matchingIndex !== -1 && data.length !== 0) {
-                    output.item[matchingIndex].name = `<b>Position:</b> ${data[0].device_id.zone_id.floor_id.building_id.project_id.name} - ${data[0].device_id.zone_id.floor_id.building_id.name} - ${data[0].device_id.zone_id.floor_id.name} - ${data[0].device_id.name}<br><b>Time:</b> ${formattedDate}<br><b>Error type:</b> ${data[0].error_code.name}<br><b>Status:</b> ${status}`;
-                    output.item[matchingIndex].icon = data[0].error_code.icon;
-                    output.item[matchingIndex].link = `${eventDetailUrl}?var-event_id=${data[0].id}`
-                }
-            }
+            // // console.log("Line 117")
+            // const idArray = output.item.map(obj => obj.id);
+            // const idString = JSON.stringify(idArray);
+            // // console.log(idString);
+            // apiUrl = `/items/fault_code_reports`;
+            // filters = {
+            //     'filter': `{"_and":[{"status": { "_null":true }},{"device_id":{"_in":${idString}}}]}`,
+            // };
+            // fields = `id%26groupBy=device_id`;
+            // var error_list = await callAPI(apiUrl, filters, fields)
+            // // console.log(error_list);
+            // for (var i = 0; i < error_list.length; i++) {
+            //     // console.log(i)
+            //     apiUrl = `/items/fault_code_reports`;
+            //     filters = {
+            //         'filter': `{"_and":[{"_or":[{"status":{"_in":["firing","acknowledged"]}} , {"status":{"_null":true}}]} , { "device_id": { "id" :{ "_eq": "${error_list[i].device_id}" }}}]}`,
+            //     };
+            //     fields = `id,device_id.zone_id.floor_id.building_id.project_id.name,device_id.zone_id.floor_id.building_id.name,device_id.zone_id.floor_id.name,timestamp,status,error_code.code,error_code.name,error_code.icon,device_id.id,device_id.name%26limit=1`;
+            //     data = await callAPI(apiUrl, filters, fields)
+            //     // console.log(data)
+            //     var status = `Firing`
+            //     if (data[0].status !== null) {
+            //         status = data[0].status.charAt(0).toUpperCase() + data[0].status.slice(1)
+            //     }
+            //     const inputDateString = data[0].timestamp;
+            //     const inputDate = new Date(inputDateString);
+
+            //     const options = {
+            //         day: '2-digit',
+            //         month: 'short',
+            //         year: 'numeric',
+            //         hour: 'numeric',
+            //         minute: '2-digit',
+            //         second: '2-digit',
+            //         hour12: false,
+            //         timeZone: 'Asia/Bangkok' // Replace with your local timezone
+            //     };
+
+            //     const formattedDate = inputDate.toLocaleString('en-US', options);
+            //     const matchingIndex = output.item.findIndex(item => item.id === error_list[i].device_id);
+            //     if (matchingIndex !== -1 && data.length !== 0) {
+            //         output.item[matchingIndex].name = `<b>Position:</b> ${data[0].device_id.zone_id.floor_id.building_id.project_id.name} - ${data[0].device_id.zone_id.floor_id.building_id.name} - ${data[0].device_id.zone_id.floor_id.name} - ${data[0].device_id.name}<br><b>Time:</b> ${formattedDate}<br><b>Error type:</b> ${data[0].error_code.name}<br><b>Status:</b> ${status}`;
+            //         output.item[matchingIndex].icon = data[0].error_code.icon;
+            //         output.item[matchingIndex].link = `${eventDetailUrl}?var-event_id=${data[0].id}`
+            //     }
+            // }
 
         } else if (obj.buildings.length == 1) {
             //use buildings show polygon floors
@@ -191,7 +256,7 @@ export async function fetchData() {
                 name: item.name,
                 position: item.polygon,
                 id: item.id,
-                link: `${energyUrl}?var-v_projects=${obj.projects[0]}&var-v_buildings=${obj.buildings[0]}&var-v_floors=${item.id}`
+                link: `${energyUrl}?var-v_projects=${obj.projects[0]}&var-v_buildings=${obj.buildings[0]}&var-v_floors=${item.id}`,
             }));
             output.item = mappedData;
 
@@ -218,7 +283,7 @@ export async function fetchData() {
                 output.item[i].energy = sumEnergyKwH.toFixed(3);
             }
 
-            output.item.sort((a, b) => parseFloat(a.energy) - parseFloat(b.energy));
+            output.item.sort((a, b) => parseFloat(b.energy) - parseFloat(a.energy));
             for (var i = 0; i < output.item.length; i++) {
                 if(i < colorArray.length){
                     output.item[i].color = colorArray[i]
@@ -285,7 +350,7 @@ export async function fetchData() {
                 }, 0);
                 output.item[i].energy = sumEnergyKwH.toFixed(3);
             }
-            output.item.sort((a, b) => parseFloat(a.energy) - parseFloat(b.energy));
+            output.item.sort((a, b) => parseFloat(b.energy) - parseFloat(a.energy));
             for (var i = 0; i < output.item.length; i++) {
                 if(i < colorArray.length){
                     output.item[i].color = colorArray[i]
@@ -356,7 +421,7 @@ export async function fetchData() {
                 //     output.item[i].status = "firing";
                 // }
             }
-            output.item.sort((a, b) => parseFloat(a.energy) - parseFloat(b.energy));
+            output.item.sort((a, b) => parseFloat(b.energy) - parseFloat(a.energy));
             for (var i = 0; i < output.item.length; i++) {
                 if(i < colorArray.length){
                     output.item[i].color = colorArray[i]

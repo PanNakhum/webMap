@@ -51,7 +51,8 @@ async function init() {
             });
             markers.addLayer(marker);
             allMarkersObjArray.push(marker)
-        } else {
+        } else if(data.item[i].position != null) {
+            // console.log("write polygon")
             const coordinates = data.item[i].position.split("],[")
                 .map(coord => coord.replace(/\[|\]/g, ""))
                 .map(coord => coord.split(",").map(Number));
@@ -132,7 +133,7 @@ async function init() {
                 });
                 markers.addLayer(marker);
                 allMarkersObjArray.push(marker)
-            } else {
+            } else if(data.item[i].position != null){
                 const coordinates = data.item[i].position.split("],[")
                     .map(coord => coord.replace(/\[|\]/g, ""))
                     .map(coord => coord.split(",").map(Number));
@@ -174,6 +175,14 @@ async function init() {
     setInterval(async function () {
         await updateData();
     }, 60 * 1000);
+
+    var str = '';
+        function onMapClick(e) {
+            str += ("[" + e.latlng.lat + ", " + e.latlng.lng + "],")
+            // alert("[" + e.latlng.lat + ", " + e.latlng.lng + "]");
+            alert(str)
+        }
+        map.on('click', onMapClick);
 }
 
 init();
