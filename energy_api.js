@@ -120,7 +120,7 @@ export async function fetchData() {
                 position: item.polygon,
                 // icon: item.device_model_id.icon,
                 id: item.id,
-                onhover: true,
+                // onhover: true,
                 // Include other fields as needed
             }));
             // output.item = output.item || [];

@@ -176,13 +176,13 @@ async function init() {
         await updateData();
     }, 60 * 1000);
 
-    var str = '';
-        function onMapClick(e) {
-            str += ("[" + e.latlng.lat + ", " + e.latlng.lng + "],")
-            // alert("[" + e.latlng.lat + ", " + e.latlng.lng + "]");
-            alert(str)
-        }
-        map.on('click', onMapClick);
+    // var str = '';
+    //     function onMapClick(e) {
+    //         str += ("[" + e.latlng.lat + ", " + e.latlng.lng + "],")
+    //         // alert("[" + e.latlng.lat + ", " + e.latlng.lng + "]");
+    //         alert(str)
+    //     }
+    //     map.on('click', onMapClick);
 }
 
 init();
