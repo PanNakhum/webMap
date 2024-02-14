@@ -16,6 +16,27 @@ async function init() {
     var allMarkersObjArray = []; // for marker objects
     var markers = L.layerGroup().addTo(map);
 
+    if (data.button.length > 1) {
+        for (let i in data.button) {
+            var customButton = L.Control.extend({
+                options: {
+                    position: 'bottomleft'
+                },
+                
+                onAdd: function (map) {
+                    var container = L.DomUtil.create('div', 'leaflet-control-custom');
+                    container.innerHTML = `Floor ${data.button[i].name}`;
+                    container.onclick = function () {
+                        console.log(`Floor ${data.button[i].name}`);
+                        window.open(data.button[i].link, '_top');
+                    };
+                    return container;
+                }
+            });
+            map.addControl(new customButton());
+        }
+    }
+
     for (let i in data.item) {
         var color = 'rgba(0, 0, 0, 0)';
         // color = 'rgba(243, 175, 61, 1)'

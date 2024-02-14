@@ -15,6 +15,28 @@ async function init() {
     var allMarkersObjArray = []; // for marker objects
     var markers = L.layerGroup().addTo(map);
 
+    if (data.button.length > 1) {
+        for (let i in data.button) {
+            var customButton = L.Control.extend({
+                options: {
+                    position: 'bottomleft'
+                },
+                
+                onAdd: function (map) {
+                    var container = L.DomUtil.create('div', 'leaflet-control-custom');
+                    container.innerHTML = `Floor ${data.button[i].name}`;
+                    container.onclick = function () {
+                        console.log(`Floor ${data.button[i].name}`);
+                        window.open(data.button[i].link, '_top');
+                    };
+                    return container;
+                }
+            });
+            map.addControl(new customButton());
+        }
+    }
+
+
     for (let i in data.item) {
         // var color = 'rgba(243, 175, 61, 1)';
         // if (data.item[i].power > 700) {
@@ -51,7 +73,7 @@ async function init() {
             });
             markers.addLayer(marker);
             allMarkersObjArray.push(marker)
-        } else if(data.item[i].position != null) {
+        } else if (data.item[i].position != null) {
             // console.log("write polygon")
             const coordinates = data.item[i].position.split("],[")
                 .map(coord => coord.replace(/\[|\]/g, ""))
@@ -64,17 +86,17 @@ async function init() {
             }).addTo(map);
             polygon._path.classList.add('blinking');
 
-            if(data.item[1].onhover === true){
+            if (data.item[1].onhover === true) {
                 polygon.bindTooltip(`<b>${data.item[i].name}</b><br><b>Power: </b>${parseFloat(data.item[i].power).toLocaleString()} kW<br><b>Energy(Day): </b>${parseFloat(data.item[i].energy).toLocaleString()} kWh`, {
                     permanent: true,
                     direction: 'center',
                     className: 'custom-tooltip',
                     opacity: '1'
                 });
-            }else{
+            } else {
                 polygon.bindTooltip(`<b>${data.item[i].name}</b><br><b>Power: </b>${parseFloat(data.item[i].power).toLocaleString()} kW<br><b>Energy(Day): </b>${parseFloat(data.item[i].energy).toLocaleString()} kWh`, { closeOnClick: false });
             }
-            
+
 
             // Add the polygon to the map
             polygon.addTo(map);
@@ -133,7 +155,7 @@ async function init() {
                 });
                 markers.addLayer(marker);
                 allMarkersObjArray.push(marker)
-            } else if(data.item[i].position != null){
+            } else if (data.item[i].position != null) {
                 const coordinates = data.item[i].position.split("],[")
                     .map(coord => coord.replace(/\[|\]/g, ""))
                     .map(coord => coord.split(",").map(Number));
@@ -145,14 +167,14 @@ async function init() {
                 }).addTo(map);
                 polygon._path.classList.add('blinking');
                 // console.log(color)
-                if(data.item[1].onhover === true){
+                if (data.item[1].onhover === true) {
                     polygon.bindTooltip(`<b>${data.item[i].name}</b><br><b>Power: </b>${parseFloat(data.item[i].power).toLocaleString()} kW<br><b>Energy(Day): </b>${parseFloat(data.item[i].energy).toLocaleString()} kWh`, {
                         permanent: true,
                         direction: 'center',
                         className: 'custom-tooltip',
                         opacity: '1'
                     });
-                }else{
+                } else {
                     polygon.bindTooltip(`<b>${data.item[i].name}</b><br><b>Power: </b>${parseFloat(data.item[i].power).toLocaleString()} kW<br><b>Energy(Day): </b>${parseFloat(data.item[i].energy).toLocaleString()} kWh`, { closeOnClick: false });
                 }
                 allMarkersObjArray.push(polygon)

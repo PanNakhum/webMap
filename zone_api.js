@@ -55,6 +55,10 @@ export async function fetchData() {
                 link: 'click',
                 status: 'normal',
                 position: 'position'
+            },
+            button:{
+                name: 'name',
+                link: 'link'
             }
         }
 
@@ -167,10 +171,11 @@ export async function fetchData() {
             var filters = {
                 'filter[id][_eq]': obj.buildings[0]
             };
-            var fields = 'image';
+            var fields = 'image,project_id';
             var data = await callAPI(apiUrl, filters, fields)
             // console.log(data)
             output.image = data[0].image
+            obj.projects[0] = data[0].project_id
 
             apiUrl = `/items/floors`;
             filters = {
@@ -189,6 +194,24 @@ export async function fetchData() {
                 link: `${securityUrl}?var-v_projects=${obj.projects[0]}&var-v_buildings=${obj.buildings[0]}&var-v_floors=${item.id}`
             }));
             output.item = mappedData;
+
+            const mappedDataB = data.map(item => ({
+                name: item.name,
+                link: `${securityUrl}?var-v_projects=${obj.projects[0]}&var-v_buildings=${obj.buildings[0]}&var-v_floors=${item.id}`,
+            }));
+            mappedDataB.sort((b, a) => {
+                if (isNaN(a.name) && isNaN(b.name)) {
+                  return a.name.localeCompare(b.name);
+                } else if (isNaN(a.name)) {
+                  return 1;
+                } else if (isNaN(b.name)) {
+                  return -1;
+                } else {
+                  return b.name - a.name;
+                }
+              });
+            output.button = mappedDataB;
+
 
             for (var i = 0; i < output.item.length; i++) {
                 apiUrl = `/items/fault_code_reports`;
