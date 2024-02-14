@@ -25,9 +25,9 @@ async function init() {
                 
                 onAdd: function (map) {
                     var container = L.DomUtil.create('div', 'leaflet-control-custom');
-                    container.innerHTML = `Floor ${data.button[i].name}`;
+                    container.innerHTML = `${data.button[i].name}`;
                     container.onclick = function () {
-                        console.log(`Floor ${data.button[i].name}`);
+                        // console.log(`Floor ${data.button[i].name}`);
                         window.open(data.button[i].link, '_top');
                     };
                     return container;
