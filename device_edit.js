@@ -168,8 +168,8 @@ async function init() {
         var result = window.confirm(`Do you want to change device "${data.item[0].name}" from (${data.item[0].position}) to (${parseInt(e.latlng.lat)},${parseInt(e.latlng.lng)}) ?`);
         if (result) {
             // console.log("Yes")
-            await editData(`{"id":"${selectId}","pos_x":${parseInt(e.latlng.lat)},"pos_y":${parseInt(e.latlng.lng)}}`)
-            console.log(res)
+            await editData(`{"id":"${data.item[0].id}","pos_x":${parseInt(e.latlng.lat)},"pos_y":${parseInt(e.latlng.lng)}}`)
+            // console.log(res)
             updateData()
             // alert("You clicked 'Yes'");
         } 
