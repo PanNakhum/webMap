@@ -160,22 +160,23 @@ async function init() {
         await updateData();
     }, 60 * 1000);
 
-    var str = '';
+    // var str = '';
     async function onMapClick(e) {
-        str += ("[" + e.latlng.lat + ", " + e.latlng.lng + "],")
+        // str += ("[" + e.latlng.lat + ", " + e.latlng.lng + "],")
         // alert("[" + e.latlng.lat + ", " + e.latlng.lng + "]");
         // alert(str)
         var result = window.confirm(`Do you want to change device "${data.item[0].name}" from (${data.item[0].position}) to (${e.latlng.lat},${e.latlng.lng}) ?`);
         if (result) {
-            console.log("Yes")
+            // console.log("Yes")
             var res = await editData(`{"id":"${data.item[0].id}","pos_x":${e.latlng.lat},"pos_y":${e.latlng.lng}}`)
             console.log(res)
             updateData()
             // alert("You clicked 'Yes'");
-        } else {
-            console.log("No")
-            // alert("You clicked 'No'");
-        }
+        } 
+        // else {
+        //     // console.log("No")
+        //     // alert("You clicked 'No'");
+        // }
     }
     map.on('click', onMapClick);
 }
