@@ -1,5 +1,5 @@
-import { editData, fetchData } from './device_edit_api.js';
-
+import { editData, fetchData } from './device_edit_all_api.js';
+var selectId;
 async function init() {
     var data = await fetchData();
     var map = L.map('map', {
@@ -41,19 +41,25 @@ async function init() {
             var customIcon = new LeafIcon();
             // console.log(parseInt((Math.random() * 10).toFixed(0)) + data.item[i].position.split(",")[0]);
             var marker = L.marker([data.item[i].position.split(",")[0], data.item[i].position.split(",")[1]], { icon: customIcon });
-            console.log(data.item[i])
+            // console.log(data.item[i])
             // console.log(`<b>${data.item[i].name}</b><br><b>Power: </b>${parseFloat(data.item[i].power).toLocaleString()} kW<br><b>Energy(Day): </b>${parseFloat(data.item[i].energy).toLocaleString()} kWh`)
-            marker.bindTooltip( data.item[i].name , {
+            marker.bindTooltip(data.item[i].name, {
                 offset: [0, -45],
                 direction: 'top',
-                // permanent: true,
+                permanent: true,
                 // direction: 'center',
                 // className: 'custom-tooltip',
                 // opacity: '1'
             });
             marker.on('click', function () {
                 // Open the link when the marker is clicked
-                window.open(data.item[i].link, '_top');
+                selectId = data.item[i].id
+                // console.log
+                allMarkersObjArray[i].getTooltip().setContent(`<b>${data.item[i].name}</b>`);
+                allMarkersObjArray[i].getTooltip().update();
+                updateData()
+                // console.log(data.item[i].name)
+                // window.open(data.item[i].link, '_top');
             });
             markers.addLayer(marker);
             allMarkersObjArray.push(marker)
@@ -68,7 +74,7 @@ async function init() {
                 fillColor: data.item[i].color, //'rgba(236, 99, 64, 1)', // Fill color of the polygon
                 fillOpacity: 0.5  // Opacity of the fill color (0 is fully transparent, 1 is fully opaque)
             }).addTo(map);
-            polygon._path.classList.add('blinking');
+            // polygon._path.classList.add('blinking');
 
             // Add the polygon to the map
             polygon.addTo(map);
@@ -77,7 +83,7 @@ async function init() {
 
             // // Add an onClick event to forward to obj[i].link
             polygon.on('click', function () {
-                window.open(data.item[i].link, "_top");
+                // window.open(data.item[i].link, "_top");
             });
 
         }
@@ -109,21 +115,37 @@ async function init() {
                     options: {
                         iconSize: [40, 40],
                         iconAnchor: [20, 40],
+                        permanent: true,
                         // color: color,
                         // className: 'blinking',
                         iconUrl: data.item[i].icon
                     }
                 });
                 var customIcon = new LeafIcon();
+                if(data.item[i].id == selectId){
+                    data.item[i].name = `<b>${data.item[i].name}</b>`;
+                    // allMarkersObjArray[i].getTooltip().getElement().style.backgroundColor = 'red';
+                    // LeafIcon.options.className = 'blinking';
+                }else{
+                    
+                }
                 // console.log(parseInt((Math.random() * 10).toFixed(0)) + data.item[i].position.split(",")[0]);
                 var marker = L.marker([data.item[i].position.split(",")[0], data.item[i].position.split(",")[1]], { icon: customIcon });
                 marker.bindTooltip(data.item[i].name, {
                     offset: [0, -45],
+                    permanent:true,
                     direction: 'top'
                 });
+
                 marker.on('click', function () {
                     // Open the link when the marker is clicked
-                    window.open(data.item[i].link, '_top');
+                    // window.open(data.item[i].link, '_top');
+                    selectId = data.item[i].id
+                    // console.log
+                    allMarkersObjArray[i].getTooltip().setContent(`<b>${data.item[i].name}</b>`);
+                    // allMarkersObjArray[i].getTooltip().getElement().style.backgroundColor = 'red';
+                    allMarkersObjArray[i].getTooltip().update();
+                    updateData()
                 });
                 markers.addLayer(marker);
                 allMarkersObjArray.push(marker)
@@ -137,7 +159,7 @@ async function init() {
                     fillColor: data.item[i].color, //'rgba(236, 99, 64, 1)', // Fill color of the polygon
                     fillOpacity: 0.7  // Opacity of the fill color (0 is fully transparent, 1 is fully opaque)
                 }).addTo(map);
-                polygon._path.classList.add('blinking');
+                // polygon._path.classList.add('blinking');
                 // console.log(color)
                 allMarkersObjArray.push(polygon)
 
@@ -149,7 +171,7 @@ async function init() {
 
                 // // Add an onClick event to forward to obj[i].link
                 polygon.on('click', function () {
-                    window.open(data.item[i].link, "_top");
+                    // window.open(data.item[i].link, "_top");
                 });
 
             }
@@ -165,14 +187,21 @@ async function init() {
         // str += ("[" + e.latlng.lat + ", " + e.latlng.lng + "],")
         // alert("[" + e.latlng.lat + ", " + e.latlng.lng + "]");
         // alert(str)
-        var result = window.confirm(`Do you want to change device "${data.item[0].name}" from (${data.item[0].position}) to (${parseInt(e.latlng.lat)},${parseInt(e.latlng.lng)}) ?`);
+        if(selectId == undefined) return ;
+        var index;
+        for(index in data.item){
+            if(data.item[index].id == selectId) break ;
+        }
+        var result = window.confirm(`Do you want to change device "${data.item[index].name.replace(/<[^>]*>/g, '')}" from (${data.item[index].position}) to (${parseInt(e.latlng.lat)},${parseInt(e.latlng.lng)}) ?`);
         if (result) {
             // console.log("Yes")
+            // console.log(selectId)
             await editData(`{"id":"${selectId}","pos_x":${parseInt(e.latlng.lat)},"pos_y":${parseInt(e.latlng.lng)}}`)
-            console.log(res)
+            // console.log(res)
+            selectId = undefined
             updateData()
             // alert("You clicked 'Yes'");
-        } 
+        }
         // else {
         //     // console.log("No")
         //     // alert("You clicked 'No'");
