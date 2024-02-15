@@ -12,6 +12,7 @@ const config = {
     // energyDetailUrl: 'https://qnvdemo.grafana.net/d/Energy_Detail/energy-detail',
     
     rootUrl: 'https://ioc-backend.mqdc.com/flows/trigger/ab9422fc-bfc0-477f-b78c-2254965167d3',
+    patchUrl: 'https://ioc-backend.mqdc.com/flows/trigger/8110a24c-880d-461a-b727-67da79d94860',
     authToken: 'b5zk6s9vdjfKURf9ztQ1VgWqBwDAJd5s',
     securityUrl: 'https://qnvdemo.grafana.net/d/Security_New/security',
     energyUrl: 'https://qnvdemo.grafana.net/d/Energy_/energy',
