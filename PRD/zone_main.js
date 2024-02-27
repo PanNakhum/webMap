@@ -39,7 +39,7 @@ async function init() {
 
     for (let i in data.item) {
         var color = 'rgba(0, 0, 0, 0)';
-        color = 'rgba(243, 175, 61, 1)'
+        // color = 'rgba(243, 175, 61, 1)'
         if (data.item[i].status == 'firing') {
             color = 'rgba(236, 99, 64, 1)';
         } else if (data.item[i].status == 'acknowledged') {
@@ -168,13 +168,13 @@ async function init() {
         await updateData();
     }, 60 * 1000);
     
-    var str = '';
-        function onMapClick(e) {
-            str += ("[" + e.latlng.lat + ", " + e.latlng.lng + "],")
-            // alert("[" + e.latlng.lat + ", " + e.latlng.lng + "]");
-            alert(str)
-        }
-        map.on('click', onMapClick);
+    // var str = '';
+    //     function onMapClick(e) {
+    //         str += ("[" + e.latlng.lat + ", " + e.latlng.lng + "],")
+    //         // alert("[" + e.latlng.lat + ", " + e.latlng.lng + "]");
+    //         alert(str)
+    //     }
+    //     map.on('click', onMapClick);
 }
 
 init();
