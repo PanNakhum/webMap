@@ -239,7 +239,7 @@ export async function fetchData() {
                 // 'filter[zone_id][floor_id][_eq]': obj.floor_id,
                 // 'filter[device_model_id][_in]': obj.device_model_id
             };
-            fields = 'label,polygon,floor,floor_num';
+            fields = 'label,polygon,floor,floor_num,id';
             data = await callAPI(apiUrl, filters, fields)
             // use ID for check status 
 
