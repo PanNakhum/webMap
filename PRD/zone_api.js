@@ -70,7 +70,7 @@ export async function fetchData() {
             };
             var fields = 'image,floor,building_id';
             var data = await callAPI(apiUrl, filters, fields)
-            console.log(data)
+            // console.log(data)
             output.image = data[0].image
             let floor_key = data[0].floor
             obj.buildings[0] = data[0].building_id
@@ -99,7 +99,7 @@ export async function fetchData() {
                 // Include other fields as needed
             }));
             output.item = mappedData;
-            console.log(output)
+            // console.log(output)
 
             for (var i = 0; i < output.item.length; i++) {
                 if (output.item[i].server_id.length != 0 && output.item[i].src_index.length != 0 && output.item[i].src_type.length != 0) {
@@ -111,7 +111,7 @@ export async function fetchData() {
                     };
                     fields = `status,event_id.icon,happen_time,event_id.name&limit=1`;
                     data = await callAPI(apiUrl, filters, fields)
-                    console.log(data)
+                    // console.log(data)
 
                     if (data.length === 0) {
                         output.item[i].status = "resolved";
