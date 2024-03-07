@@ -45,7 +45,7 @@ export async function fetchData() {
         // obj.projects = obj.projects.split(',')
         // obj.buildings = obj.buildings.split(',')
         // obj.floors = obj.floors.split(',')
-        
+
 
         var output = {
             image: 'urlLink',
@@ -55,8 +55,16 @@ export async function fetchData() {
                 link: 'click',
                 status: 'normal',
                 position: 'position'
+            },
+            button: {
+                name: 'name',
+                link: 'link'
             }
         }
+
+        output.button = [{ name: "Ignore", link: `https://moon.mqdc.com/flows/trigger/9a0dbd0f-69a9-41fe-a732-73d740e3ea9b?id=${obj.event_id}&status=ignored` }
+            , { name: "Create Incident", link: `https://moon.mqdc.com/flows/trigger/c9275cd0-b802-439e-8768-ef4fff5afd1f?title=${obj.title}&severity=pending&url=${obj.url}` }
+        ]
 
         //use floor show device
         var apiUrl = `/items/fault_code_reports`;
@@ -66,7 +74,7 @@ export async function fetchData() {
         var fields = 'status,device_id.id,device_id.name,device_id.pos_x,device_id.pos_y,error_code.name,error_code.icon,device_id.zone_id.floor_id.image,device_id.zone_id.floor_id.building_id.project_id.name,device_id.zone_id.floor_id.building_id.name,device_id.zone_id.floor_id.name,timestamp';
         var data = await callAPI(apiUrl, filters, fields)
         var status = `Firing`
-        if(data[0].status !== null){
+        if (data[0].status !== null) {
             status = data[0].status.charAt(0).toUpperCase() + data[0].status.slice(1)
         }
         const inputDateString = data[0].timestamp;
@@ -79,9 +87,9 @@ export async function fetchData() {
             hour: 'numeric',
             minute: '2-digit',
             second: '2-digit',
-            hour12: false ,
+            hour12: false,
             timeZone: 'Asia/Bangkok' // Replace with your local timezone
-          };
+        };
 
         const formattedDate = inputDate.toLocaleString('en-US', options);
 
@@ -89,14 +97,14 @@ export async function fetchData() {
         // console.log(data)
         output.image = data[0].device_id.zone_id.floor_id.image
         const mappedData = data.map(item => ({
-                name: `<b>Position:</b> ${item.device_id.zone_id.floor_id.building_id.project_id.name} - ${item.device_id.zone_id.floor_id.building_id.name} - ${item.device_id.zone_id.floor_id.name} - ${item.device_id.name}<br><b>Time:</b> ${formattedDate}<br><b>Error type:</b> ${item.error_code.name}<br><b>Status:</b> ${status}`,
-                position: item.device_id.pos_x + ',' + item.device_id.pos_y,
-                icon: item.error_code.icon,
-                id: item.device_id.id,
-                // link: `${energyDetailUrl}?var-device_id=${item.id}`
-                // Include other fields as needed
-            }));
-            output.item = mappedData;
+            name: `<b>Position:</b> ${item.device_id.zone_id.floor_id.building_id.project_id.name} - ${item.device_id.zone_id.floor_id.building_id.name} - ${item.device_id.zone_id.floor_id.name} - ${item.device_id.name}<br><b>Time:</b> ${formattedDate}<br><b>Error type:</b> ${item.error_code.name}<br><b>Status:</b> ${status}`,
+            position: item.device_id.pos_x + ',' + item.device_id.pos_y,
+            icon: item.error_code.icon,
+            id: item.device_id.id,
+            // link: `${energyDetailUrl}?var-device_id=${item.id}`
+            // Include other fields as needed
+        }));
+        output.item = mappedData;
         // console.log(output)
 
 

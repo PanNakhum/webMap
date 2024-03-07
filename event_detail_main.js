@@ -16,6 +16,114 @@ async function init() {
     var allMarkersObjArray = []; // for marker objects
     var markers = L.layerGroup().addTo(map);
 
+    if (data.button.length > 1) {
+        for (let i in data.button) {
+            var customButton = L.Control.extend({
+                options: {
+                    position: 'bottomleft'
+                },
+
+                onAdd: function (map) {
+                    var container = L.DomUtil.create('div', 'leaflet-control-custom');
+                    container.innerHTML = `${data.button[i].name}`;
+                    container.onclick = function () {
+                        // Add alert here
+                        if (data.button[i].name == "Create Incident") {
+                            Swal.fire({
+                                title: `Are you sure?`,
+                                text: `This action will create an incident.`,
+                                icon: "question",
+                                showCancelButton: true,
+                                confirmButtonColor: "#3085d6",
+                                cancelButtonColor: "#d33",
+                                confirmButtonText: 'Yes, create it!',
+                                cancelButtonText: 'Cancel'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    fetch(data.button[i].link)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            console.log("Data returned from API:", data);
+                                            // Handle the returned data here
+                                            Swal.fire({
+                                                title: "Create Incident!",
+                                                text: "Incident has been created.",
+                                                icon: "success",
+                                                confirmButtonText: "Open incident detail in new tab."
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    console.log("Open incident detail in new tab.")
+                                                    // Here you can open incident detail in new tab
+                                                }
+                                            });
+                                        })
+                                        .catch(error => {
+                                            console.error('Error:', error);
+                                            // Handle errors here
+                                        });
+                                    // Swal.fire({
+                                    //     title: "Create Incident!",
+                                    //     text: "Incident has been created.",
+                                    //     icon: "success",
+                                    //     confirmButtonText: "Open incident detail in new tab."
+                                    // }).then((result) => {
+                                    //     if (result.isConfirmed) {
+                                    //         console.log("Open incident detail in new tab.")
+                                    //     }
+                                    // });
+
+                                }
+                                else {
+                                    // // Open the link after the alert
+                                    //                         window.open(data.button[i].link, '_top');
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                title: `Are you sure?`,
+                                text: `This action will ignore an event.`,
+                                icon: "warning",
+                                showCancelButton: true,
+                                confirmButtonColor: "#3085d6",
+                                cancelButtonColor: "#d33",
+                                confirmButtonText: 'Yes, ignore it!',
+                                cancelButtonText: 'Cancel'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    fetch(data.button[i].link)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            console.log("Data returned from API:", data);
+                                            // Handle the returned data here
+                                            Swal.fire({
+                                                title: "Ignore!",
+                                                text: "Event has been ignore.",
+                                                icon: "success",
+                                                // confirmButtonText: "Open incident detail in new tab."
+                                            });
+                                        })
+                                        .catch(error => {
+                                            console.error('Error:', error);
+                                            // Handle errors here
+                                        });
+                                    // Swal.fire({
+                                    //     title: "Ignore!",
+                                    //     text: "Event has been ignore.",
+                                    //     icon: "success"
+                                    // });
+
+                                }
+                            });
+                        }
+                    };
+                    return container;
+                }
+            });
+            map.addControl(new customButton());
+        }
+    }
+
+
     for (let i in data.item) {
         var color = 'rgba(0, 0, 0, 0)';
         // color = 'rgba(243, 175, 61, 1)'
@@ -24,7 +132,7 @@ async function init() {
         } else if (data.item[i].status == 'acknowledged') {
             color = 'rgba(243, 175, 61, 1)';
         }
-        
+
         if (data.item[i].icon != null) {
             var LeafIcon = L.Icon.extend({
                 options: {
@@ -37,9 +145,10 @@ async function init() {
             });
             var customIcon = new LeafIcon();
             // console.log(parseInt((Math.random() * 10).toFixed(0)) + data.item[i].position.split(",")[0]);
-            var marker = L.marker([data.item[i].position.split(",")[0] , data.item[i].position.split(",")[1]], { icon: customIcon });
+            var marker = L.marker([data.item[i].position.split(",")[0], data.item[i].position.split(",")[1]], { icon: customIcon });
             marker.bindTooltip(data.item[i].name, {
                 offset: [0, -45],
+                permanent: true,
                 direction: 'top'
             });
             marker.on('click', function () {
@@ -50,8 +159,8 @@ async function init() {
             allMarkersObjArray.push(marker)
         } else {
             const coordinates = data.item[i].position.split("],[")
-            .map(coord => coord.replace(/\[|\]/g, ""))
-            .map(coord => coord.split(",").map(Number));
+                .map(coord => coord.replace(/\[|\]/g, ""))
+                .map(coord => coord.split(",").map(Number));
             // console.log(coordinates)
             var polygon = L.polygon(coordinates, {
                 color: color, //'black', // 'rgba(236, 99, 64, 1)',    // Border color of the polygon
@@ -59,13 +168,13 @@ async function init() {
                 fillOpacity: 0.7  // Opacity of the fill color (0 is fully transparent, 1 is fully opaque)
             }).addTo(map);
             allMarkersObjArray.push(polygon)
-            
+
 
 
             // Add a tooltip to the polygon with closeOnClick set to false
             polygon.bindTooltip(data.item[i].name, { closeOnClick: false });
             // polygon.bindPopup(data.item[i].name);
-            
+
             // // Add an onClick event to forward to obj[i].link
             polygon.on('click', function () {
                 window.open(data.item[i].link, "_top");
@@ -73,17 +182,17 @@ async function init() {
 
         }
     }
-    
+
     async function updateData() {
         data = await fetchData();
 
-        for(let i = 0; i < allMarkersObjArray.length; i++){
+        for (let i = 0; i < allMarkersObjArray.length; i++) {
             map.removeLayer(allMarkersObjArray[i]);
-            
+
         }
         allMarkersObjArray = []
 
-    
+
 
         for (let i in data.item) {
             var color = 'rgba(0, 0, 0, 0)';
@@ -93,7 +202,7 @@ async function init() {
             } else if (data.item[i].status == 'acknowledged') {
                 color = 'rgba(243, 175, 61, 1)';
             }
-            
+
             if (data.item[i].icon != null) {
                 var LeafIcon = L.Icon.extend({
                     options: {
@@ -106,9 +215,10 @@ async function init() {
                 });
                 var customIcon = new LeafIcon();
                 // console.log(parseInt((Math.random() * 10).toFixed(0)) + data.item[i].position.split(",")[0]);
-                var marker = L.marker([data.item[i].position.split(",")[0] , data.item[i].position.split(",")[1]], { icon: customIcon });
+                var marker = L.marker([data.item[i].position.split(",")[0], data.item[i].position.split(",")[1]], { icon: customIcon });
                 marker.bindTooltip(data.item[i].name, {
                     offset: [0, -45],
+                    permanent: true,
                     direction: 'top'
                 });
                 marker.on('click', function () {
@@ -119,8 +229,8 @@ async function init() {
                 allMarkersObjArray.push(marker)
             } else {
                 const coordinates = data.item[i].position.split("],[")
-                .map(coord => coord.replace(/\[|\]/g, ""))
-                .map(coord => coord.split(",").map(Number));
+                    .map(coord => coord.replace(/\[|\]/g, ""))
+                    .map(coord => coord.split(",").map(Number));
                 // console.log(coordinates)
                 var polygon = L.polygon(coordinates, {
                     color: color, //'black', // 'rgba(236, 99, 64, 1)',    // Border color of the polygon
@@ -128,17 +238,17 @@ async function init() {
                     fillOpacity: 0.7  // Opacity of the fill color (0 is fully transparent, 1 is fully opaque)
                 }).addTo(map);
                 allMarkersObjArray.push(polygon)
-    
-    
+
+
                 // Add a tooltip to the polygon with closeOnClick set to false
                 polygon.bindTooltip(data.item[i].name, { closeOnClick: false });
                 // polygon.bindPopup(data.item[i].name);
-                
+
                 // // Add an onClick event to forward to obj[i].link
                 polygon.on('click', function () {
                     window.open(data.item[i].link, "_top");
                 });
-    
+
             }
         }
     }
