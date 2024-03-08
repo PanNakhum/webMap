@@ -21,8 +21,7 @@ async function callAPI(apiUrl) {
     }
 
     const data = await response.json();
-    // console.log(data.data);
-    return data.data
+    return data
 }
 
 async function init() {
@@ -63,7 +62,9 @@ async function init() {
                     if (result.isConfirmed) {
                         try {
                             var dataAPI = await callAPI(ci)
-                            // console.log(data)
+                            // console.log("asdasd")
+                            // console.log(dataAPI.url)
+                            console.log(dataAPI)
                             Swal.fire({
                                 title: "Create Incident!",
                                 text: "Incident has been created.",
@@ -72,7 +73,7 @@ async function init() {
                             }).then((result) => {
                                 if (result.isConfirmed) {
                                     console.log("Open incident detail in new tab.")
-                                    window.open(dataAPI, '_blank');
+                                    window.open(dataAPI.url, '_blank');
                                     // Here you can open incident detail in new tab
                                 }
                             });
