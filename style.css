@@ -69,15 +69,18 @@ body, :root {
   cursor: pointer;
 }
 .leaflet-ig {
+  font-size: 18px;
   color: white;
   background-color: rgb(24, 27, 31);
-  border: 0px solid #ccccdc;
+  border: 1px solid #ccccdc;
   border-radius: 4px;
   padding: 5px 10px;
   cursor: pointer;
 }
 
 .leaflet-Create {
+  font-size: 18px;
+  font-weight: bold;
   color: #000000;
   background-color: #FFDD00;
   border: 1px solid #ccccdc;
