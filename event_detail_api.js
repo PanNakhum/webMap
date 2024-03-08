@@ -62,12 +62,14 @@ export async function fetchData() {
             }
         }
 
-        output.button = [{ name: "Create Incident", link: `http://uranus3.dtgo.com:8055/flows/trigger/9eec8485-a692-4fcb-ae60-239dffac3df9?title=${obj.title}&severity=pending&url=${obj.url}` }
-        , { name: "Ignore", link: `http://uranus3.dtgo.com:8055/flows/trigger/04807c4e-290c-466a-8697-eb878baad9e0?id=${obj.event_id}&status=ignored` }
+        // output.button = [{ name: "Create Incident", link: `http://uranus3.dtgo.com:8055/flows/trigger/9eec8485-a692-4fcb-ae60-239dffac3df9?title=${obj.title}&severity=pending&url=${obj.url}` }
+        // , { name: "Ignore", link: `http://uranus3.dtgo.com:8055/flows/trigger/04807c4e-290c-466a-8697-eb878baad9e0?id=${obj.event_id}&status=ignored` }
+        // ]
+        output.button = [{ name: "Create Incident", link: `https://moon.mqdc.com/flows/trigger/c9275cd0-b802-439e-8768-ef4fff5afd1f?title=${obj.title}&severity=pending&url=${obj.url}` }
+            , { name: "Ignore", link: `https://moon.mqdc.com/flows/trigger/9a0dbd0f-69a9-41fe-a732-73d740e3ea9b?id=${obj.event_id}&status=ignored` }
         ]
-        // output.button = [{ name: "Ignore", link: `https://moon.mqdc.com/flows/trigger/9a0dbd0f-69a9-41fe-a732-73d740e3ea9b?id=${obj.event_id}&status=ignored` }
-            // , { name: "Create Incident", link: `https://moon.mqdc.com/flows/trigger/c9275cd0-b802-439e-8768-ef4fff5afd1f?title=${obj.title}&severity=pending&url=${obj.url}` }
-            
+
+
 
         //use floor show device
         var apiUrl = `/items/fault_code_reports`;
