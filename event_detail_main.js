@@ -1,5 +1,29 @@
 import { fetchData } from './event_detail_api.js';
 
+async function callAPI(apiUrl) {
+    // const apiUrlWithParams = new URL(`${rootUrl}${apiUrl}`);
+    // apiUrlWithParams.search = new URLSearchParams(filters).toString() + `&fields=${fields}`;
+    const apiUrlWithParams = new URL(`${apiUrl}`);
+    // apiUrlWithParams.search = `?param=${apiUrl}?` + new URLSearchParams(filters).toString() + `%26fields=${fields}`;
+    // console.log(apiUrlWithParams)
+    // const headers = {
+    //     Authorization: `Bearer ${authToken}`,
+    //     'Content-Type': 'application/json'
+    // };
+
+    const response = await fetch(apiUrlWithParams, {
+        method: 'GET',
+        // headers: headers
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    // console.log(data.data);
+    return data.data
+}
 
 async function init() {
     var data = await fetchData();
@@ -16,112 +40,177 @@ async function init() {
     var allMarkersObjArray = []; // for marker objects
     var markers = L.layerGroup().addTo(map);
 
-    if (data.button.length > 1) {
-        for (let i in data.button) {
-            var customButton = L.Control.extend({
-                options: {
-                    position: 'bottomleft'
-                },
-
-                onAdd: function (map) {
-                    var container = L.DomUtil.create('div', 'leaflet-control-custom');
-                    container.innerHTML = `${data.button[i].name}`;
-                    container.onclick = function () {
-                        // Add alert here
-                        if (data.button[i].name == "Create Incident") {
+    var customButton = L.Control.extend({
+        options: {
+            // position: 'bottomleft'
+            position: 'topright'
+        }, onAdd: function (map) {
+            var container = L.DomUtil.create('div', 'leaflet-Create');
+            container.innerHTML = `${data.button[0].name}`;
+            container.onclick = function () {
+                // Add alert here
+                var ci = data.button[0].link
+                Swal.fire({
+                    title: `Are you sure?`,
+                    text: `This action will create an incident.`,
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: 'Yes, create it!',
+                    cancelButtonText: 'Cancel'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            var dataAPI = await callAPI(ci)
+                            // console.log(data)
                             Swal.fire({
-                                title: `Are you sure?`,
-                                text: `This action will create an incident.`,
-                                icon: "question",
-                                showCancelButton: true,
-                                confirmButtonColor: "#3085d6",
-                                cancelButtonColor: "#d33",
-                                confirmButtonText: 'Yes, create it!',
-                                cancelButtonText: 'Cancel'
+                                title: "Create Incident!",
+                                text: "Incident has been created.",
+                                icon: "success",
+                                confirmButtonText: "Open incident detail in new tab."
                             }).then((result) => {
                                 if (result.isConfirmed) {
-                                    fetch(data.button[i].link)
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            console.log("Data returned from API:", data);
-                                            // Handle the returned data here
-                                            Swal.fire({
-                                                title: "Create Incident!",
-                                                text: "Incident has been created.",
-                                                icon: "success",
-                                                confirmButtonText: "Open incident detail in new tab."
-                                            }).then((result) => {
-                                                if (result.isConfirmed) {
-                                                    console.log("Open incident detail in new tab.")
-                                                    // Here you can open incident detail in new tab
-                                                }
-                                            });
-                                        })
-                                        .catch(error => {
-                                            console.error('Error:', error);
-                                            // Handle errors here
-                                        });
-                                    // Swal.fire({
-                                    //     title: "Create Incident!",
-                                    //     text: "Incident has been created.",
-                                    //     icon: "success",
-                                    //     confirmButtonText: "Open incident detail in new tab."
-                                    // }).then((result) => {
-                                    //     if (result.isConfirmed) {
-                                    //         console.log("Open incident detail in new tab.")
-                                    //     }
-                                    // });
-
-                                }
-                                else {
-                                    // // Open the link after the alert
-                                    //                         window.open(data.button[i].link, '_top');
+                                    console.log("Open incident detail in new tab.")
+                                    window.open(dataAPI, '_blank');
+                                    // Here you can open incident detail in new tab
                                 }
                             });
-                        } else {
-                            Swal.fire({
-                                title: `Are you sure?`,
-                                text: `This action will ignore an event.`,
-                                icon: "warning",
-                                showCancelButton: true,
-                                confirmButtonColor: "#3085d6",
-                                cancelButtonColor: "#d33",
-                                confirmButtonText: 'Yes, ignore it!',
-                                cancelButtonText: 'Cancel'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    fetch(data.button[i].link)
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            console.log("Data returned from API:", data);
-                                            // Handle the returned data here
-                                            Swal.fire({
-                                                title: "Ignore!",
-                                                text: "Event has been ignore.",
-                                                icon: "success",
-                                                // confirmButtonText: "Open incident detail in new tab."
-                                            });
-                                        })
-                                        .catch(error => {
-                                            console.error('Error:', error);
-                                            // Handle errors here
-                                        });
-                                    // Swal.fire({
-                                    //     title: "Ignore!",
-                                    //     text: "Event has been ignore.",
-                                    //     icon: "success"
-                                    // });
 
-                                }
-                            });
+                        } catch (error) {
+                            console.error(error);
                         }
-                    };
-                    return container;
-                }
-            });
-            map.addControl(new customButton());
+                    }
+                });
+
+            };
+            return container;
         }
-    }
+    });
+    map.addControl(new customButton());
+
+    var customButton = L.Control.extend({
+        options: {
+            // position: 'bottomleft'
+            position: 'topright'
+        }, onAdd: function (map) {
+            var container = L.DomUtil.create('div', 'leaflet-ig');
+            container.innerHTML = `${data.button[1].name}`;
+            container.onclick = function () {
+                var ig = data.button[1].link
+                Swal.fire({
+                    title: `Are you sure?`,
+                    text: `This action will ignore an event.`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: 'Yes, ignore it!',
+                    cancelButtonText: 'Cancel'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            var dataAPI = await callAPI(ig)
+                            console.log(dataAPI)
+                            Swal.fire({
+                                title: "Ignore!",
+                                text: "Event has been ignore.",
+                                icon: "success",
+                            })
+                        } catch (error) {
+                            console.error(error);
+                        }
+                    }
+                });
+
+            };
+            return container;
+        }
+    });
+    map.addControl(new customButton());
+
+
+    // if (data.button.length > 1) {
+    //     for (let i in data.button) {
+    //         var customButton = L.Control.extend({
+    //             options: {
+    //                 // position: 'bottomleft'
+    //                 position: 'topright'
+    //             },
+
+    //             onAdd: function (map) {
+    //                 var container = L.DomUtil.create('div', 'leaflet-control-custom');
+    //                 container.innerHTML = `${data.button[i].name}`;
+    //                 container.onclick = function () {
+    //                     // Add alert here
+    //                     if (data.button[i].name == "Create Incident") {
+    //                         var ci = data.button[i].link
+    //                         Swal.fire({
+    //                             title: `Are you sure?`,
+    //                             text: `This action will create an incident.`,
+    //                             icon: "question",
+    //                             showCancelButton: true,
+    //                             confirmButtonColor: "#3085d6",
+    //                             cancelButtonColor: "#d33",
+    //                             confirmButtonText: 'Yes, create it!',
+    //                             cancelButtonText: 'Cancel'
+    //                         }).then(async (result) => {
+    //                             if (result.isConfirmed) {
+    //                                 try {
+    //                                     var dataAPI = await callAPI(ci)
+    //                                     // console.log(data)
+    //                                     Swal.fire({
+    //                                         title: "Create Incident!",
+    //                                         text: "Incident has been created.",
+    //                                         icon: "success",
+    //                                         confirmButtonText: "Open incident detail in new tab."
+    //                                     }).then((result) => {
+    //                                         if (result.isConfirmed) {
+    //                                             console.log("Open incident detail in new tab.")
+    //                                             window.open(dataAPI, '_blank');
+    //                                             // Here you can open incident detail in new tab
+    //                                         }
+    //                                     });
+
+    //                                 } catch (error) {
+    //                                     console.error(error);
+    //                                 }
+    //                             }
+    //                         });
+    //                     } else {
+    //                         var ig = data.button[i].link
+    //                         Swal.fire({
+    //                             title: `Are you sure?`,
+    //                             text: `This action will ignore an event.`,
+    //                             icon: "warning",
+    //                             showCancelButton: true,
+    //                             confirmButtonColor: "#3085d6",
+    //                             cancelButtonColor: "#d33",
+    //                             confirmButtonText: 'Yes, ignore it!',
+    //                             cancelButtonText: 'Cancel'
+    //                         }).then(async (result) => {
+    //                             if (result.isConfirmed) {
+    //                                 try {
+    //                                     var dataAPI = await callAPI(ig)
+    //                                     console.log(dataAPI)
+    //                                     Swal.fire({
+    //                                         title: "Ignore!",
+    //                                         text: "Event has been ignore.",
+    //                                         icon: "success",
+    //                                     })
+    //                                 } catch (error) {
+    //                                     console.error(error);
+    //                                 }
+    //                             }
+    //                         });
+    //                     }
+    //                 };
+    //                 return container;
+    //             }
+    //         });
+    //         map.addControl(new customButton());
+    //     }
+    // }
 
 
     for (let i in data.item) {

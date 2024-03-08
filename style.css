@@ -68,3 +68,20 @@ body, :root {
   padding: 5px 10px;
   cursor: pointer;
 }
+.leaflet-ig {
+  color: white;
+  background-color: rgb(24, 27, 31);
+  border: 0px solid #ccccdc;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.leaflet-Create {
+  color: #000000;
+  background-color: #FFDD00;
+  border: 1px solid #ccccdc;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
