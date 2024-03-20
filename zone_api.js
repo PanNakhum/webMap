@@ -142,6 +142,13 @@ export async function fetchData() {
                 if(data[0].status !== null){
                     status = data[0].status.charAt(0).toUpperCase() + data[0].status.slice(1)
                 }
+                if(status == "Firing"){
+                    status = "Incomming"
+                }else if(status == "Acknowledged"){
+                    status = "In progress"
+                }else{
+                    status = "Complete"
+                }
                 const inputDateString = data[0].timestamp;
                 const inputDate = new Date(inputDateString);
 

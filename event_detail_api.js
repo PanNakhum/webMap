@@ -69,7 +69,7 @@ export async function fetchData() {
         //     , { name: "Ignore", link: `https://moon.mqdc.com/flows/trigger/9a0dbd0f-69a9-41fe-a732-73d740e3ea9b?id=${obj.event_id}&status=ignored` }
         // ]
         output.button = [{ name: "Create Incident", link: `https://ioc-backend.mqdc.com/flows/trigger/c13c0723-3c5e-461b-8c06-a758886f98a6?title=${obj.title}&severity=pending&url=${obj.url}` }
-            , { name: "Ignore", link: `https://ioc-backend.mqdc.com/flows/trigger/4351df2a-4371-4525-b16d-54b89040fa23?id=${obj.event_id}&status=ignored` }
+            , { name: "Fault Alarm", link: `https://ioc-backend.mqdc.com/flows/trigger/4351df2a-4371-4525-b16d-54b89040fa23?id=${obj.event_id}&status=ignored` }
         ]
 
         
@@ -87,6 +87,14 @@ export async function fetchData() {
         if (data[0].status !== null) {
             status = data[0].status.charAt(0).toUpperCase() + data[0].status.slice(1)
         }
+        if(status == "Firing"){
+            status = "Incomming"
+        }else if(status == "Acknowledged"){
+            status = "In progress"
+        }else{
+            status = "Complete"
+        }
+
         const inputDateString = data[0].timestamp;
         const inputDate = new Date(inputDateString);
 
